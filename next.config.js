@@ -13,6 +13,11 @@ const nextConfig = {
       },
     ],
   },
+  webpack: (config, { isServer }) => {
+    // Firebase config
+    config.externals = [...(config.externals || []), { firebase: 'firebase' }];
+    return config;
+  },
 };
 
 module.exports = nextConfig; 
