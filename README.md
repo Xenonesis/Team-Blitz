@@ -5,7 +5,7 @@
   <p><em>Innovate. Create. Collaborate.</em></p>
 </div>
 
-A modern, responsive landing page for Team Blitz, showcasing our talented team members, innovative projects, and contact information. Built with cutting-edge web technologies for optimal performance and user experience.
+A modern, responsive landing page for Team Blitz, showcasing our talented team members and innovative projects. Built with cutting-edge web technologies for optimal performance and user experience.
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.3.2-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.0.0-blue?style=for-the-badge&logo=react)](https://react.dev/)
@@ -18,7 +18,6 @@ A modern, responsive landing page for Team Blitz, showcasing our talented team m
 - **Modern UI** - Sleek glass-effect components with smooth animations
 - **Team Profiles** - Detailed team member information with social links
 - **Project Showcase** - Interactive gallery of our latest projects
-- **Contact Form** - Easy-to-use contact form with validation
 - **Dark/Light Mode** - Toggle between dark and light themes
 - **Performance Optimized** - Fast loading times and smooth interactions
 
