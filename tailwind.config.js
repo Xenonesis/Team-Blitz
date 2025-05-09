@@ -7,6 +7,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-inter)'],
+      },
       animation: {
         'float': 'float 6s ease-in-out infinite',
         'fade-in': 'fadeIn 0.5s ease-in forwards',
