@@ -156,6 +156,7 @@ export function ParticleBackground() {
     
     // Set canvas dimensions
     const setCanvasDimensions = () => {
+      if (!canvas) return;
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     };
@@ -173,6 +174,7 @@ export function ParticleBackground() {
       color: string;
       
       constructor() {
+        if (!canvas) throw new Error('Canvas is not initialized');
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
         this.size = Math.random() * 3 + 1;
@@ -182,6 +184,7 @@ export function ParticleBackground() {
       }
       
       update() {
+        if (!canvas) return;
         this.x += this.speedX;
         this.y += this.speedY;
         
@@ -193,7 +196,7 @@ export function ParticleBackground() {
       }
       
       draw() {
-        if (!ctx) return;
+        if (!ctx || !canvas) return;
         ctx.fillStyle = this.color;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
@@ -205,12 +208,21 @@ export function ParticleBackground() {
     const particleCount = Math.min(100, Math.floor((canvas.width * canvas.height) / 15000));
     const particles: Particle[] = [];
     
-    for (let i = 0; i < particleCount; i++) {
-      particles.push(new Particle());
+    try {
+      for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+      }
+    } catch (error) {
+      console.error('Failed to initialize particles:', error);
+      return;
     }
     
     // Animation loop
+    let animationFrameId: number;
+    
     const animate = () => {
+      if (!ctx || !canvas) return;
+      
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
       particles.forEach(particle => {
@@ -218,13 +230,17 @@ export function ParticleBackground() {
         particle.draw();
       });
       
-      requestAnimationFrame(animate);
+      animationFrameId = requestAnimationFrame(animate);
     };
     
     animate();
     
+    // Cleanup function
     return () => {
       window.removeEventListener('resize', setCanvasDimensions);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
     };
   }, []);
   
@@ -232,6 +248,7 @@ export function ParticleBackground() {
     <canvas 
       ref={canvasRef} 
       className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
+      aria-hidden="true"
     />
   );
 }
