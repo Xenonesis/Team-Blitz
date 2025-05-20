@@ -503,20 +503,36 @@ export default function Home() {
               }
               delay={500}
             />
+            
+            {/* Project 4 - Budget Buddy AI */}
+            <ProjectCard
+              title="Budget Buddy AI"
+              subtitle="Smart Money Management"
+              description="An intuitive financial management tool that helps users track expenses, create budgets, set savings goals, and gain insights into spending patterns with AI-powered analytics."
+              technologies={["React", "TailwindCSS", "Firebase", "AI Analytics"]}
+              bgGradient="bg-gradient-to-br from-green-500/20 to-emerald-500/20"
+              icon={
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-green-300/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              }
+              delay={600}
+              projectUrl="https://budgetbuddyai.netlify.app/"
+            />
           </div>
 
           {/* View All Projects Button */}
           <AnimatedElement animation="fade-in" delay={600}>
             <div className="text-center mt-12">
-              <a
-                href="#"
+              <Link
+                href="/projects"
                 className="inline-flex items-center glass-effect hover:bg-blue-700/30 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 border border-white/20 hover:border-white/50 hover:-translate-y-1"
               >
                 View All Projects
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
-              </a>
+              </Link>
             </div>
           </AnimatedElement>
         </div>

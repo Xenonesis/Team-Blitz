@@ -1,8 +1,8 @@
 @echo off
 echo Updating GitHub repository...
 
-git add README.md package.json
-git commit -m "Update to version 0.2.0 with improved README design"
+git add .
+git commit -m "Update to version 5.5"
 git push -u origin main
 
 echo Done!

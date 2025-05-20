@@ -70,11 +70,35 @@ export default function Navbar({ activeSection }: NavbarProps) {
     };
   }, [isMenuOpen]);
 
+  // State to track if we're on the home page
+  const [isHomePage, setIsHomePage] = useState(true);
+  
+  // Check if we're on the home page or another page
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const pathname = window.location.pathname;
+      setIsHomePage(pathname === '/' || pathname === '');
+    }
+  }, []);
+
   const navLinks: NavLink[] = [
-    { href: "#about", label: "About" },
-    { href: "#team", label: "Team" },
-    { href: "#projects", label: "Projects" },
-    { href: "/contact", label: "Contact", isExternal: true }
+    { 
+      href: isHomePage ? "#about" : "/#about", 
+      label: "About" 
+    },
+    { 
+      href: isHomePage ? "#team" : "/#team", 
+      label: "Team" 
+    },
+    { 
+      href: isHomePage ? "#projects" : "/#projects", 
+      label: "Projects" 
+    },
+    { 
+      href: "/contact", 
+      label: "Contact", 
+      isExternal: true 
+    }
   ];
 
   return (
@@ -90,7 +114,7 @@ export default function Navbar({ activeSection }: NavbarProps) {
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between">
             {/* Logo with Modern Design - Improved for Mobile */}
-            <a href="#" className="flex items-center group">
+            <Link href="/" className="flex items-center group">
               <div className="relative">
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg blur opacity-35 group-hover:opacity-85 transition duration-500"></div>
                 <div className="relative flex items-center bg-blue-600/20 dark:bg-blue-800/30 backdrop-blur-sm px-5 py-3 rounded-full border border-blue-400/30 dark:border-blue-500/30 shadow-md hover:shadow-lg transition-all duration-300">
@@ -100,7 +124,7 @@ export default function Navbar({ activeSection }: NavbarProps) {
                   <div className="animate-pulse ml-2 group-hover:animate-bounce text-yellow-500 dark:text-yellow-400 text-xl">⚡</div>
                 </div>
               </div>
-            </a>
+            </Link>
 
             {/* Desktop Navigation - Modern Style */}
             <div className="hidden md:flex items-center space-x-2">
@@ -110,9 +134,10 @@ export default function Navbar({ activeSection }: NavbarProps) {
                     <Link
                       key={link.href}
                       href={link.href}
-                      className={`nav-link-enhanced relative px-5 py-2.5 rounded-full transition-all duration-300 hover:bg-blue-500/10 dark:hover:bg-blue-600/20 group ${
-                        activeSection === link.href.substring(1)
-                          ? "nav-active text-white font-medium bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border-blue-400/30 border animate-pulse-subtle shadow-md"
+                      className={`nav-link relative px-5 py-2.5 rounded-full transition-all duration-300 hover:bg-blue-500/10 dark:hover:bg-blue-600/20 group ${
+                        (activeSection === link.href.substring(1) || 
+                         (activeSection === "projects" && link.label === "Projects"))
+                          ? "nav-active text-white font-medium bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border-blue-400/30 border pulse-subtle shadow-md border-b-2 border-blue-500 dark:border-blue-400"
                           : "text-gray-700 dark:text-white/80 hover:text-blue-600 dark:hover:text-white"
                       }`}
                       onMouseEnter={(e) => {
@@ -138,7 +163,8 @@ export default function Navbar({ activeSection }: NavbarProps) {
                       key={link.href}
                       href={link.href}
                       className={`relative px-5 py-2.5 rounded-full transition-all duration-300 hover:bg-white/10 dark:hover:bg-gray-700/50 group ${
-                        activeSection === link.href.substring(1)
+                        (activeSection === link.href.substring(1) || 
+                         (activeSection === "projects" && link.label === "Projects"))
                           ? "nav-active text-white font-medium bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border-blue-400/30 border animate-pulse-subtle shadow-md"
                           : "text-gray-700 dark:text-white/80 hover:text-blue-600 dark:hover:text-white"
                       }`}
@@ -232,7 +258,7 @@ export default function Navbar({ activeSection }: NavbarProps) {
                       <Link
                         key={link.href}
                         href={link.href}
-                        className={`transition-all duration-300 flex items-center p-3 rounded-xl animate-slide-right menu-delay-${index} ${
+                        className={`transition-all duration-300 flex items-center p-3 rounded-xl slide-right menu-delay-${index} ${
                           activeSection === link.href.substring(1)
                             ? "bg-gradient-to-r from-blue-600/20 to-indigo-600/20 text-white font-medium border-l-2 border-blue-500"
                             : "hover:bg-white/5 text-white/80 hover:text-white hover:border-l-2 hover:border-blue-500/50"
@@ -254,7 +280,8 @@ export default function Navbar({ activeSection }: NavbarProps) {
                         key={link.href}
                         href={link.href}
                         className={`transition-all duration-300 flex items-center p-3 rounded-xl animate-slide-right menu-delay-${index} ${
-                          activeSection === link.href.substring(1)
+                          (activeSection === link.href.substring(1) || 
+                           (activeSection === "projects" && link.label === "Projects"))
                             ? "bg-gradient-to-r from-blue-600/20 to-indigo-600/20 text-white font-medium border-l-2 border-blue-500"
                             : "hover:bg-white/5 text-white/80 hover:text-white hover:border-l-2 hover:border-blue-500/50"
                         } hover:translate-x-1`}
