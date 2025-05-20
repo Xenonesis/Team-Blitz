@@ -1,9 +1,9 @@
-# 🚀 Team Blitz v5.0
+# 🚀 Team Blitz v5.5
 
 <div align="center">
   <img src="public/logo.png" alt="Team Blitz Logo" width="200" />
   <p><em>Innovate. Create. Collaborate. - Now with Enhanced Visuals!</em></p>
-  <p><strong>Version 5.0</strong> - May 2024</p>
+  <p><strong>Version 5.5</strong> - May 2025</p>
 </div>
 
 <div align="center">
@@ -127,6 +127,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## 📝 Version History
 
+- **5.5** - Version update to 5.5
 - **5.0** - Custom SVG avatars, enhanced UI, SwiftDrop showcase
 - **4.0** - Dark mode, performance improvements
 - **3.0** - Team section redesign, animations
