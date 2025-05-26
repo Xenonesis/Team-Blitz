@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@react-three/drei": "^10.0.8",
     "firebase": "^10.8.0",
     "framer-motion": "^10.16.16",
     "next": "15.3.0",
@@ -17,6 +18,8 @@
     "react-intersection-observer": "^9.5.3",
     "react-tsparticles": "^2.12.2",
     "sharp": "^0.32.6",
+    "three": "^0.176.0",
+    "three-stdlib": "^2.36.0",
     "tsparticles": "^2.12.0"
   },
   "devDependencies": {
@@ -24,6 +27,7 @@
     "@types/node": "^20.10.4",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.17",
+    "@types/three": "^0.176.0",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.55.0",
     "eslint-config-next": "15.3.0",

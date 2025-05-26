@@ -7,7 +7,7 @@ import { AnimatedElement, ScrollProgress, ParticleBackground } from "@/utils/ani
 import ProjectCard from "@/components/ProjectCard";
 import Card3D from "@/components/Card3D";
 import Navbar from "@/components/Navbar";
-import CustomCursor from './cursor';
+import CustomCursor from '../components/cursor';
 
 
 export default function Home() {
