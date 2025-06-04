@@ -69,7 +69,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="min-h-screen flex items-center pt-20">
         <div className="container mx-auto px-6 py-20 text-center relative">
-          {/* Decorative elements */}
+            {/* Decorative elements */}
           <div className="absolute top-20 left-10 w-20 h-20 rounded-full bg-blue-500/20 animate-float"></div>
           <div className="absolute bottom-20 right-10 w-32 h-32 rounded-full bg-indigo-500/20 animate-float delay-300"></div>
           <div className="absolute top-40 right-20 w-16 h-16 rounded-full bg-purple-500/20 animate-float delay-500"></div>
@@ -79,7 +79,17 @@ export default function Home() {
             <h1 className="text-5xl md:text-7xl font-bold mb-6 relative">
               <span className="text-gradient">Team Blitz</span>
               <span className="block mt-2">Innovative Hackathon Team</span>
-              <div className="absolute -top-10 right-1/2 transform translate-x-1/2 text-4xl animate-pulse">⚡</div>
+              <div
+  className=" -top-10 left-1/2 text-yellow-500 dark:text-yellow-400 text-3xl transition-all duration-300 group-hover:rotate-[15deg] group-hover:scale-110 absolute "
+  style={{
+    zIndex: -999,
+    pointerEvents: 'none',
+    isolation: 'isolate'
+  }}
+>
+  ⚡
+</div>
+
             </h1>
 
             <AnimatedElement animation="slide-up" delay={300} duration={1000}>
@@ -90,6 +100,12 @@ export default function Home() {
             </AnimatedElement>
 
             <div className="flex flex-col md:flex-row justify-center gap-6">
+                {/* Scroll indicator */}
+            <div className="absolute bottom-10 sm:block hidden transform -translate-x-1/2 animate-bounce mt-20 opacity-70">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+            </div>
               <a
                 href="#projects"
                 className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-10 rounded-full transition-all duration-300 shadow-lg hover:shadow-blue-500/50 hover:-translate-y-1 hover-scale"
@@ -98,12 +114,7 @@ export default function Home() {
               </a>
             </div>
 
-            {/* Scroll indicator */}
-            <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce mt-20 opacity-70">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
-            </div>
+
           </AnimatedElement>
         </div>
       </section>
@@ -192,7 +203,7 @@ export default function Home() {
                 <div className="ml-2 text-2xl">⚡</div>
               </div>
               <p className="text-gray-300 mb-6 max-w-md">
-                Led by Aditya Kumar Tiwari, we're a team of passionate developers, designers, and innovators who come together to create amazing solutions during hackathons.
+                Led by Aditya Kumar Tiwari And Aayush Tonk, we're a team of passionate developers, designers, and innovators who come together to create amazing solutions during hackathons.
               </p>
               <div className="flex space-x-4">
                 <a href="#" className="bg-blue-900/30 hover:bg-blue-800/50 p-3 rounded-full transition-colors" aria-label="Twitter" title="Twitter">
