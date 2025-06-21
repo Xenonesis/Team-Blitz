@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useCallback, useMemo } from "react";
-import "./ProfileCard.css";
+import "./profilecard.css";
 import Image from "next/image";
 
 interface SocialLink {
