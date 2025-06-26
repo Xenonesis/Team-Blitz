@@ -19,8 +19,8 @@ interface ProfileCardProps {
   className?: string;
   enableTilt?: boolean;
   miniAvatarUrl?: string;
-  name?: string;
-  title?: string;
+  name?: React.ReactNode; // <-- change from string to React.ReactNode
+  title?: React.ReactNode; // <-- change from string to React.ReactNode
   handle?: string;
   status?: string;
   contactText?: string;

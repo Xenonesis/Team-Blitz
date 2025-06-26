@@ -1,40 +1,71 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import ProfileCard from '../components/ui/profilecard';
 import adityaImage from '@/assets/team/1.png';
 import swatiImage from '@/assets/team/swati.jpg';
 import aayushImage from '@/assets/team/ayush.jpg';
 import shivamImage from '@/assets/team/ashwani.jpg';
 import prachiImage from '@/assets/team/prachi.jpg';
-import ehshanImage from '@/assets/team/shivam.jpg';
+import ehshanImage from '@/assets/team/joker.jpg';
 import muneerImage from '@/assets/team/muneerali.jpg';
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.3
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.5,
+      ease: "easeOut"
+    }
+  }
+};
+
+const textVariants = {
+  hidden: { 
+    opacity: 0,
+    y: 20
+  },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.1,
+      duration: 0.5,
+      ease: "easeOut"
+    }
+  }),
+  hoverHidden: {
+    opacity: 0,
+    y: -10,
+    transition: { duration: 0.2 }
+  }
+};
+
 export default function Team() {
-  const [refreshToken, setRefreshToken] = useState(Date.now());
   const [isLoading, setIsLoading] = useState(true);
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
 
   useEffect(() => {
     const loadTimer = setTimeout(() => {
       setIsLoading(false);
     }, 500);
 
-    const tokenRefreshInterval = setInterval(() => {
-      setRefreshToken(Date.now());
-    }, 5 * 60 * 1000);
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        setRefreshToken(Date.now());
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
     return () => {
       clearTimeout(loadTimer);
-      clearInterval(tokenRefreshInterval);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
@@ -49,23 +80,49 @@ export default function Team() {
     );
   }
 
+  const renderAnimatedText = (text: string, custom: number, cardId: number) => (
+    <motion.span 
+      custom={custom}
+      initial="hidden"
+      animate={hoveredCard === cardId ? "hoverHidden" : "visible"}
+      variants={textVariants}
+    >
+      {text}
+    </motion.span>
+  );
+
   return (
-    <section id="team" className="py-20 relative overflow-hidden" key={refreshToken}>
+    <section id="team" className="py-20 relative overflow-hidden">
       <div className="absolute top-40 left-10 w-60 h-60 rounded-full bg-blue-500/5 animate-float"></div>
       <div className="absolute bottom-20 right-10 w-40 h-40 rounded-full bg-indigo-500/5 animate-float delay-300"></div>
 
       <div className="container mx-auto px-6 relative">
-        <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center">
+        <motion.h2 
+          className="text-4xl md:text-5xl font-bold mb-16 text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <span className="text-gradient">Meet Our Team</span>
-        </h2>
+        </motion.h2>
 
         <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
             {/* Team Member 1 - Aditya */}
-            <div className="flex justify-center px-4">
+            <motion.div 
+              className="flex justify-center px-4" 
+              variants={itemVariants}
+              onMouseEnter={() => setHoveredCard(1)}
+              onMouseLeave={() => setHoveredCard(null)}
+            >
               <ProfileCard
-                name="Aditya Kumar Tiwari"
-                title="Team Leader & Developer"
+                name={renderAnimatedText("Aditya Kumar Tiwari", 0, 1)}
+                title={renderAnimatedText("Team Leader & Developer", 1, 1)}
                 handle="Xenonesis"
                 status="Online"
                 contactText="Contact Me"
@@ -79,13 +136,18 @@ export default function Team() {
                   { url: 'https://iaddy.netlify.app/', icon: 'portfolio' }
                 ]}
               />
-            </div>
+            </motion.div>
 
             {/* Team Member 2 - Swati */}
-            <div className="flex justify-center px-4">
+            <motion.div 
+              className="flex justify-center px-4" 
+              variants={itemVariants}
+              onMouseEnter={() => setHoveredCard(2)}
+              onMouseLeave={() => setHoveredCard(null)}
+            >
               <ProfileCard
-                name="Swati Mishra"
-                title="Developer"
+                name={renderAnimatedText("Swati Mishra", 0.2, 2)}
+                title={renderAnimatedText("Developer", 0.3, 2)}
                 handle="SwatiMishra01"
                 status="Online"
                 contactText="Contact Me"
@@ -98,13 +160,18 @@ export default function Team() {
                   { url: 'https://github.com/SwatiMishra01', icon: 'github' }
                 ]}
               />
-            </div>
+            </motion.div>
 
             {/* Team Member 3 - Aayush */}
-            <div className="flex justify-center px-4">
+            <motion.div 
+              className="flex justify-center px-4" 
+              variants={itemVariants}
+              onMouseEnter={() => setHoveredCard(3)}
+              onMouseLeave={() => setHoveredCard(null)}
+            >
               <ProfileCard
-                name="Aayush Tonk"
-                title="Backend Engineer"
+                name={renderAnimatedText("Aayush Tonk", 0.4, 3)}
+                title={renderAnimatedText("Backend Engineer", 0.5, 3)}
                 handle="Amaayu"
                 status="Online"
                 contactText="Contact Me"
@@ -117,13 +184,18 @@ export default function Team() {
                   { url: 'https://github.com/Amaayu', icon: 'github' }
                 ]}
               />
-            </div>
+            </motion.div>
 
             {/* Team Member 4 - Shivam */}
-            <div className="flex justify-center px-4">
+            <motion.div 
+              className="flex justify-center px-4" 
+              variants={itemVariants}
+              onMouseEnter={() => setHoveredCard(4)}
+              onMouseLeave={() => setHoveredCard(null)}
+            >
               <ProfileCard
-                name="Ashwani"
-                title="UI/UX Developer"
+                name={renderAnimatedText("Ashwani", 0.6, 4)}
+                title={renderAnimatedText("UI/UX Developer", 0.7, 4)}
                 handle="Ashwani"
                 status="Online"
                 contactText="Contact Me"
@@ -135,13 +207,18 @@ export default function Team() {
                   { url: 'https://www.linkedin.com/in/shivam-verma-818222270', icon: 'linkedin' }
                 ]}
               />
-            </div>
+            </motion.div>
 
             {/* Team Member 5 - Prachi */}
-            <div className="flex justify-center px-4">
+            <motion.div 
+              className="flex justify-center px-4" 
+              variants={itemVariants}
+              onMouseEnter={() => setHoveredCard(5)}
+              onMouseLeave={() => setHoveredCard(null)}
+            >
               <ProfileCard
-                name="Prachi Upadhyay"
-                title="Web Developer"
+                name={renderAnimatedText("Prachi Upadhyay", 0.8, 5)}
+                title={renderAnimatedText("Web Developer", 0.9, 5)}
                 handle="prachiupadhyay"
                 status="Online"
                 contactText="Contact Me"
@@ -153,13 +230,18 @@ export default function Team() {
                   { url: 'https://www.linkedin.com/in/prachi-upadhyay-926487301/', icon: 'linkedin' }
                 ]}
               />
-            </div>
+            </motion.div>
 
             {/* Team Member 6 - Mohammad */}
-            <div className="flex justify-center px-4">
+            <motion.div 
+              className="flex justify-center px-4" 
+              variants={itemVariants}
+              onMouseEnter={() => setHoveredCard(6)}
+              onMouseLeave={() => setHoveredCard(null)}
+            >
               <ProfileCard
-                name="Mohammad Ehshan"
-                title="UI/UX Designer"
+                name={renderAnimatedText("Mohammad Ehshan", 1.0, 6)}
+                title={renderAnimatedText("UI/UX Designer", 1.1, 6)}
                 handle="Mohammad-Ehshan"
                 status="Online"
                 contactText="Contact Me"
@@ -172,14 +254,30 @@ export default function Team() {
                   { url: 'https://github.com/Mohammad-Ehshan', icon: 'github' }
                 ]}
               />
-            </div>
+            </motion.div>
 
             {/* Team Member 7 - Muneer */}
-            <div className="flex justify-center px-4 col-span-full md:col-span-2">
+            <motion.div 
+              className="flex justify-center px-4 col-span-full md:col-span-2" 
+              variants={{
+                hidden: { y: 20, opacity: 0 },
+                visible: {
+                  y: 0,
+                  opacity: 1,
+                  transition: {
+                    duration: 0.5,
+                    ease: "easeOut",
+                    delay: 0.6
+                  }
+                }
+              }}
+              onMouseEnter={() => setHoveredCard(7)}
+              onMouseLeave={() => setHoveredCard(null)}
+            >
               <div className="text-center">
                 <ProfileCard
-                  name="Muneer Ali"
-                  title="Full Stack Developer"
+                  name={renderAnimatedText("Muneer Ali", 1.2, 7)}
+                  title={renderAnimatedText("Full Stack Developer", 1.3, 7)}
                   handle="Muneerali199"
                   status="Online"
                   contactText="Contact Me"
@@ -193,22 +291,9 @@ export default function Team() {
                   ]}
                   className="text-center"
                 />
-                {/* Custom styling applied via parent div */}
-                <style jsx>{`
-                  .profile-card :global(.name) {
-                    font-weight: bold;
-                    font-size: 1.25rem;
-                    color: #3b82f6;
-                  }
-                  .profile-card :global(.title) {
-                    font-weight: medium;
-                    font-size: 1.125rem;
-                    color: #4b5563;
-                  }
-                `}</style>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
     </section>
