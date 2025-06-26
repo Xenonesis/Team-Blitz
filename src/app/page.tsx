@@ -12,6 +12,24 @@ import Team from '../components/teams';
 export default function Home() {
   const [activeSection, setActiveSection] = useState("home");
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshToken, setRefreshToken] = useState(Date.now());
+
+  // Handle loading state and refresh tokens
+  useEffect(() => {
+    // Simulate loading (replace with actual loading logic)
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+      // Refresh tokens every 30 minutes for smooth performance
+      const tokenRefreshInterval = setInterval(() => {
+        setRefreshToken(Date.now());
+      }, 30 * 60 * 1000); // 30 minutes
+    
+      return () => clearInterval(tokenRefreshInterval);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Handle scroll position for animations and active section detection
   useEffect(() => {
@@ -38,10 +56,54 @@ export default function Home() {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [scrollPosition]);
+  }, [scrollPosition, refreshToken]);
+
+  // Loading Screen Component
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center">
+        <div className="relative w-32 h-32 mb-8">
+          {/* Animated logo or spinner */}
+          <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-blue-500 border-r-blue-500 animate-spin"></div>
+          <div className="absolute inset-4 rounded-full border-4 border-transparent border-t-purple-500 border-r-purple-500 animate-spin-reverse"></div>
+          <div className="absolute inset-8 flex items-center justify-center">
+            <div className="text-4xl font-bold text-gradient">⚡</div>
+          </div>
+        </div>
+        
+        {/* Loading progress bar */}
+        <div className="w-64 h-2 bg-gray-800 rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
+            style={{
+              width: '0%',
+              animation: 'loadingProgress 2s ease-in-out forwards'
+            }}
+          ></div>
+        </div>
+        
+        <p className="mt-8 text-gray-300 text-lg animate-pulse">Loading Team Blitz...</p>
+        
+        {/* CSS for the loading animation */}
+        <style jsx>{`
+          @keyframes loadingProgress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+          }
+          @keyframes spin-reverse {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(-360deg); }
+          }
+          .animate-spin-reverse {
+            animation: spin-reverse 1.5s linear infinite;
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen text-white transition-colors duration-500">
+    <div className="min-h-screen text-white transition-colors duration-500" key={refreshToken}>
       <CustomCursor />
       {/* Particle Background */}
       <ParticleBackground />
@@ -69,7 +131,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="min-h-screen flex items-center pt-20">
         <div className="container mx-auto px-6 py-20 text-center relative">
-            {/* Decorative elements */}
+          {/* Decorative elements */}
           <div className="absolute top-20 left-10 w-20 h-20 rounded-full bg-blue-500/20 animate-float"></div>
           <div className="absolute bottom-20 right-10 w-32 h-32 rounded-full bg-indigo-500/20 animate-float delay-300"></div>
           <div className="absolute top-40 right-20 w-16 h-16 rounded-full bg-purple-500/20 animate-float delay-500"></div>
@@ -80,15 +142,15 @@ export default function Home() {
               <span className="text-gradient">Team Blitz</span>
               <span className="block mt-2">Innovative Hackathon Team</span>
               <div
-  className=" -top-10 left-1/2 text-yellow-500 dark:text-yellow-400 text-3xl transition-all duration-300 group-hover:rotate-[15deg] group-hover:scale-110 absolute "
-  style={{
-    zIndex: -999,
-    pointerEvents: 'none',
-    isolation: 'isolate'
-  }}
->
-  ⚡
-</div>
+                className=" -top-10 left-1/2 text-yellow-500 dark:text-yellow-400 text-3xl transition-all duration-300 group-hover:rotate-[15deg] group-hover:scale-110 absolute "
+                style={{
+                  zIndex: -999,
+                  pointerEvents: 'none',
+                  isolation: 'isolate'
+                }}
+              >
+                ⚡
+              </div>
 
             </h1>
 
@@ -100,12 +162,12 @@ export default function Home() {
             </AnimatedElement>
 
             <div className="flex flex-col md:flex-row justify-center gap-6">
-                {/* Scroll indicator */}
-            <div className="absolute bottom-10 sm:block hidden transform -translate-x-1/2 animate-bounce mt-20 opacity-70">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
-            </div>
+              {/* Scroll indicator */}
+              <div className="absolute bottom-10 sm:block hidden transform -translate-x-1/2 animate-bounce mt-20 opacity-70">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                </svg>
+              </div>
               <a
                 href="#projects"
                 className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-10 rounded-full transition-all duration-300 shadow-lg hover:shadow-blue-500/50 hover:-translate-y-1 hover-scale"
