@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Admin User - Team Blitz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        .success {
+            background: rgba(76, 175, 80, 0.3);
+            border: 1px solid #4CAF50;
+        }
+        .error {
+            background: rgba(244, 67, 54, 0.3);
+            border: 1px solid #f44336;
+        }
+        .info {
+            background: rgba(33, 150, 243, 0.3);
+            border: 1px solid #2196F3;
+            margin-bottom: 20px;
+        }
+        .credentials {
+            background: rgba(255, 193, 7, 0.3);
+            border: 1px solid #FFC107;
+            margin-top: 15px;
+        }
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Setup Admin User</h1>
+        
+        <div class="info">
+            <strong>Info:</strong> This will create an admin user for accessing the Team Blitz hackathons dashboard.
+        </div>
+
+        <form id="setupForm">
+            <div class="form-group">
+                <label for="adminSecret">Admin Secret:</label>
+                <input 
+                    type="password" 
+                    id="adminSecret" 
+                    name="adminSecret" 
+                    placeholder="Enter admin secret key"
+                    value="team-blitz-admin-2025"
+                    required
+                >
+            </div>
+            
+            <button type="submit" id="submitBtn">Create Admin User</button>
+        </form>
+
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('setupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const result = document.getElementById('result');
+            const adminSecret = document.getElementById('adminSecret').value;
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating...';
+            result.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/setup/admin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ adminSecret })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        <strong>✅ ${data.message}</strong>
+                        <div class="credentials">
+                            <strong>Admin Credentials:</strong><br>
+                            Email: <code>${data.user.email}</code><br>
+                            Username: <code>${data.user.username}</code><br>
+                            ${data.credentials ? `Password: <code>${data.credentials.password}</code><br>` : ''}
+                            Role: <code>${data.user.role}</code>
+                        </div>
+                        <p><strong>Next Steps:</strong></p>
+                        <ol>
+                            <li>Go to <a href="/live_hackthons" style="color: #4CAF50;">/live_hackthons</a></li>
+                            <li>Login with the credentials above</li>
+                            <li>Start managing hackathons!</li>
+                        </ol>
+                    `;
+                } else {
+                    result.className = 'result error';
+                    result.innerHTML = `<strong>❌ Error:</strong> ${data.error}`;
+                }
+                
+                result.style.display = 'block';
+                
+            } catch (error) {
+                result.className = 'result error';
+                result.innerHTML = `<strong>❌ Network Error:</strong> ${error.message}`;
+                result.style.display = 'block';
+            } finally {
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Admin User';
+            }
+        });
+    </script>
+</body>
+</html>

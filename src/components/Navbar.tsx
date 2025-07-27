@@ -78,6 +78,7 @@ export default function Navbar({ activeSection }: NavbarProps) {
     { href: isHomePage ? "#team" : "/#team", label: "Team" },
     { href: isHomePage ? "#projects" : "/#projects", label: "Projects" },
     { href: "/contact", label: "Contact", isExternal: true },
+    { href: "/live_hackthons", label: "Live Hackthons", isExternal: true },
   ];
 
   return (
