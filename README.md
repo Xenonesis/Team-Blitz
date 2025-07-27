@@ -1,4 +1,4 @@
-# 🚀 Team Blitz v5.5
+# 🚀 Team Blitz v6.0.0
 
 <div align="center">
   <img src="public/logo.png" alt="Team Blitz Logo" width="200" />
