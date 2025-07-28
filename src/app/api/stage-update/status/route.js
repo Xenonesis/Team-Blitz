@@ -1,26 +1,19 @@
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { requireAdmin } from '@/middleware/auth';
 import dbConnect from '@/utils/dbConnect';
 import Hackathon from '@/models/Hackathon';
 import { getHackathonStageInfo } from '@/utils/stageUpdateService';
 
 export async function GET(request) {
   try {
-    // Verify JWT token for admin access
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'No token provided' }, { status: 401 });
-    }
-
-    const token = authHeader.substring(7);
+    // Verify admin authentication
+    const authResult = await requireAdmin(request);
     
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      if (!decoded.isAdmin) {
-        return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
-      }
-    } catch (jwtError) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    if (authResult.error) {
+      return NextResponse.json(
+        { error: authResult.error },
+        { status: authResult.status }
+      );
     }
 
     await dbConnect();

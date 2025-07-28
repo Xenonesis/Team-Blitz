@@ -13,6 +13,7 @@
         "@types/bcryptjs": "^2.4.6",
         "@types/jsonwebtoken": "^9.0.10",
         "@types/nodemailer": "^6.4.17",
+        "axios": "^1.11.0",
         "bcryptjs": "^3.0.2",
         "clsx": "^2.1.1",
         "clx": "^1.0.0",

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 import { Hackathon } from '@/types/hackathon';
 
@@ -17,6 +18,7 @@ const HackathonDateDetails: React.FC<HackathonDateDetailsProps> = ({
   daysRemaining,
   onUpdate 
 }) => {
+  const { token, isAdmin } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     startDate: hackathon.startDate,
@@ -37,7 +39,7 @@ const HackathonDateDetails: React.FC<HackathonDateDetailsProps> = ({
     const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Prepare the payload
+      // Prepare the payload - ensure all required fields are included
       const payload = {
         id: hackathon.id,
         name: hackathon.name,
@@ -45,25 +47,28 @@ const HackathonDateDetails: React.FC<HackathonDateDetailsProps> = ({
         startDate: formData.startDate,
         endDate: formData.endDate,
         leader: hackathon.leader,
-        participants: hackathon.participants,
+        participants: hackathon.participants || [],
         location: hackathon.location || 'Remote',
         technologies: formData.technologies,
         prize: formData.prize,
         totalTasks: Number(formData.totalTasks),
         website: hackathon.website || '',
         currentStage: hackathon.currentStage,
-        status: hackathon.status
+        status: hackathon.status,
+        roundDates: hackathon.roundDates || {}
       };
 
-      // Get JWT token from localStorage
-      const token = localStorage.getItem('token');
-      
+      // Check authentication
       if (!token) {
         throw new Error('Authentication required. Please log in again.');
       }
       
-      const response = await fetch('/api/hackathons', {
-        method: 'POST',
+      if (!isAdmin) {
+        throw new Error('Admin access required.');
+      }
+      
+      const response = await fetch(`/api/hackathons/${hackathon.id}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -75,7 +80,16 @@ const HackathonDateDetails: React.FC<HackathonDateDetailsProps> = ({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to update hackathon');
+        console.error('❌ Update failed:', data);
+        if (data.error && data.error.includes('duplicate key')) {
+          throw new Error('Hackathon ID conflict. Please refresh the page and try again.');
+        } else if (data.error && data.error.includes('not found')) {
+          throw new Error(`Hackathon "${hackathon.name}" not found (ID: ${hackathon.id}). It may have been deleted or the ID is incorrect.`);
+        } else if (data.error && data.error.includes('validation')) {
+          throw new Error(`Validation error: ${data.error}`);
+        } else {
+          throw new Error(data.error || `Failed to update hackathon "${hackathon.name}"`);
+        }
       }
 
       onUpdate?.(data);

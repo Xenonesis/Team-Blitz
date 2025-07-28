@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Team Blitz | Aditya's Hackathon Team",
+  title: "Team Blitz",
   description: "Meet Team Blitz - Aditya Kumar Tiwari's innovative hackathon team building amazing solutions",
   manifest: '/manifest.json',
   icons: {
