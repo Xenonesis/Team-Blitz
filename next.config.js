@@ -1,8 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ['tsparticles', 'react-tsparticles'],
+  allowedDevOrigins: [
+    'http://localhost:3000',
+    'http://192.168.1.15:3000',
+    "*"
+  ],
   experimental: {
-    optimizePackageImports: ['framer-motion', 'react-intersection-observer']
+    optimizePackageImports: ['framer-motion', 'react-intersection-observer'],
   },
   images: {
     formats: ['image/avif', 'image/webp'],
@@ -14,10 +19,9 @@ const nextConfig = {
     ],
   },
   webpack: (config, { isServer }) => {
-    // Firebase config
     config.externals = [...(config.externals || []), { firebase: 'firebase' }];
     return config;
   },
 };
 
-module.exports = nextConfig; 
+module.exports = nextConfig;
