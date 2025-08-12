@@ -171,11 +171,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
                       borderWidth: '1px',
                       borderStyle: 'solid',
                       borderColor: focusedField === 'email' ? 'var(--primary)' : 'rgba(255, 255, 255, 0.2)',
-                      color: 'var(--foreground)',
-                      focusRingColor: 'var(--primary)',
-                      '--tw-ring-color': 'var(--primary)',
-                      '--tw-ring-opacity': '0.5'
-                    }}
+                      color: 'var(--foreground)'
+                    } as React.CSSProperties}
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -208,10 +205,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
                       borderWidth: '1px',
                       borderStyle: 'solid',
                       borderColor: focusedField === 'password' ? 'var(--primary)' : 'rgba(255, 255, 255, 0.2)',
-                      color: 'var(--foreground)',
-                      '--tw-ring-color': 'var(--primary)',
-                      '--tw-ring-opacity': '0.5'
-                    }}
+                      color: 'var(--foreground)'
+                    } as React.CSSProperties}
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
