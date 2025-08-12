@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AnimatedElement } from "@/utils/animations";
 
 export default function ContactForm() {
@@ -8,6 +8,7 @@ export default function ContactForm() {
     name: "",
     email: "",
     website: "",
+    location: "",
     subject: "",
     message: ""
   });
@@ -16,6 +17,7 @@ export default function ContactForm() {
     name: "",
     email: "",
     website: "",
+    location: "",
     subject: "",
     message: ""
   });
@@ -23,6 +25,104 @@ export default function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  
+  // Location autocomplete state
+  const [locationSuggestions, setLocationSuggestions] = useState<string[]>([]);
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+  const locationContainerRef = useRef<HTMLDivElement>(null);
+
+  // Location suggestions data
+  const popularLocations = [
+    "New York, NY, USA",
+    "Los Angeles, CA, USA", 
+    "Chicago, IL, USA",
+    "Houston, TX, USA",
+    "Phoenix, AZ, USA",
+    "Philadelphia, PA, USA",
+    "San Antonio, TX, USA",
+    "San Diego, CA, USA",
+    "Dallas, TX, USA",
+    "San Jose, CA, USA",
+    "Austin, TX, USA",
+    "Jacksonville, FL, USA",
+    "Fort Worth, TX, USA",
+    "Columbus, OH, USA",
+    "Charlotte, NC, USA",
+    "San Francisco, CA, USA",
+    "Indianapolis, IN, USA",
+    "Seattle, WA, USA",
+    "Denver, CO, USA",
+    "Washington, DC, USA",
+    "Boston, MA, USA",
+    "El Paso, TX, USA",
+    "Nashville, TN, USA",
+    "Detroit, MI, USA",
+    "Oklahoma City, OK, USA",
+    "Portland, OR, USA",
+    "Las Vegas, NV, USA",
+    "Memphis, TN, USA",
+    "Louisville, KY, USA",
+    "Baltimore, MD, USA",
+    "Milwaukee, WI, USA",
+    "Albuquerque, NM, USA",
+    "Tucson, AZ, USA",
+    "Fresno, CA, USA",
+    "Mesa, AZ, USA",
+    "Sacramento, CA, USA",
+    "Atlanta, GA, USA",
+    "Kansas City, MO, USA",
+    "Colorado Springs, CO, USA",
+    "Miami, FL, USA",
+    "Raleigh, NC, USA",
+    "Omaha, NE, USA",
+    "Long Beach, CA, USA",
+    "Virginia Beach, VA, USA",
+    "Oakland, CA, USA",
+    "Minneapolis, MN, USA",
+    "Tulsa, OK, USA",
+    "Arlington, TX, USA",
+    "Tampa, FL, USA",
+    "New Orleans, LA, USA"
+  ];
+
+  // Handle location input changes and suggestions
+  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    console.log('Location input changed:', value); // Debug log
+    setFormData(prev => ({ ...prev, location: value }));
+    
+    if (value.length > 0) {
+      const filtered = popularLocations.filter(location =>
+        location.toLowerCase().includes(value.toLowerCase())
+      ).slice(0, 5);
+      console.log('Filtered suggestions:', filtered); // Debug log
+      setLocationSuggestions(filtered);
+      setShowLocationSuggestions(filtered.length > 0);
+    } else {
+      setLocationSuggestions([]);
+      setShowLocationSuggestions(false);
+    }
+  };
+
+  const selectLocation = (suggestion: string) => {
+    setFormData(prev => ({ ...prev, location: suggestion }));
+    setShowLocationSuggestions(false);
+    setLocationSuggestions([]);
+  };
+
+  // Handle clicks outside of location container
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (locationContainerRef.current && !locationContainerRef.current.contains(event.target as Node)) {
+        setShowLocationSuggestions(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
 
   const validateForm = () => {
     let valid = true;
@@ -30,6 +130,7 @@ export default function ContactForm() {
       name: "",
       email: "",
       website: "",
+      location: "",
       subject: "",
       message: ""
     };
@@ -99,6 +200,7 @@ export default function ContactForm() {
         name: "",
         email: "",
         website: "",
+        location: "",
         subject: "",
         message: ""
       });
@@ -176,6 +278,62 @@ export default function ContactForm() {
         />
         {errors.website && (
           <p className="mt-1 text-sm text-red-500">{errors.website}</p>
+        )}
+      </div>
+
+      {/* Location Field (Optional) with Autocomplete */}
+      <div className="mb-6 relative">
+        <label htmlFor="location" className="block text-sm font-medium mb-2 text-white">
+          Location <span className="text-gray-400 text-xs">(optional)</span>
+        </label>
+        <input
+          type="text"
+          id="location"
+          name="location"
+          value={formData.location}
+          onChange={(e) => {
+            const value = e.target.value;
+            setFormData(prev => ({ ...prev, location: value }));
+            
+            // Show suggestions
+            if (value.length > 0) {
+              const filtered = popularLocations.filter(location =>
+                location.toLowerCase().includes(value.toLowerCase())
+              ).slice(0, 5);
+              setLocationSuggestions(filtered);
+              setShowLocationSuggestions(filtered.length > 0);
+            } else {
+              setLocationSuggestions([]);
+              setShowLocationSuggestions(false);
+            }
+          }}
+          className={`w-full px-4 py-3 bg-[#3a4095] border ${
+            errors.location ? "border-red-500" : "border-[#4a50a5]"
+          } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors text-white`}
+          placeholder="Type to search cities..."
+          autoComplete="off"
+        />
+        {errors.location && (
+          <p className="mt-1 text-sm text-red-500">{errors.location}</p>
+        )}
+        
+        {/* Location Suggestions Dropdown */}
+        {showLocationSuggestions && locationSuggestions.length > 0 && (
+          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+            {locationSuggestions.map((suggestion, index) => (
+              <div
+                key={index}
+                onClick={() => {
+                  setFormData(prev => ({ ...prev, location: suggestion }));
+                  setShowLocationSuggestions(false);
+                  setLocationSuggestions([]);
+                }}
+                className="px-4 py-3 text-gray-800 hover:bg-gray-100 cursor-pointer transition-colors border-b border-gray-200 last:border-b-0"
+              >
+                {suggestion}
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
