@@ -14,15 +14,11 @@ export const findExpiredHackathons = async () => {
     
     console.log(`🔍 Searching for expired hackathons before: ${currentDate.toISOString()}`);
     
-    const expiredHackathons = await Hackathon.find({
-      endDate: { $lt: currentDate }
-    }).select('id name endDate status participants leader');
-    
-    // Convert endDate strings to Date objects if needed
-    expiredHackathons.forEach(hackathon => {
-      if (typeof hackathon.endDate === 'string') {
-        hackathon.endDate = new Date(hackathon.endDate);
-      }
+    // Get all hackathons and filter expired ones
+    const allHackathons = await Hackathon.find({});
+    const expiredHackathons = allHackathons.filter(hackathon => {
+      const endDate = typeof hackathon.endDate === 'string' ? new Date(hackathon.endDate) : hackathon.endDate;
+      return endDate < currentDate;
     });
     
     console.log(`📊 Found ${expiredHackathons.length} expired hackathons`);
@@ -65,8 +61,8 @@ export const deleteExpiredHackathons = async (expiredHackathons) => {
         // Log hackathon details before deletion
         console.log(`🗑️ Deleting hackathon: ${hackathon.name} (ID: ${hackathon.id}) - Ended: ${endDate.toDateString()}`);
         
-        // Delete the hackathon
-        const deleteResult = await Hackathon.deleteOne({ _id: hackathon._id });
+        // Delete the hackathon using Firebase method
+        const deleteResult = await Hackathon.deleteMany({ id: hackathon.id });
         
         if (deleteResult.deletedCount > 0) {
           deletedHackathons.push({

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import NoSSR from '@/components/NoSSR';
 
 interface User {
   id: string;
@@ -35,9 +36,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     // Check for stored token on mount
-    const storedToken = localStorage.getItem('auth_token');
-    if (storedToken) {
-      verifyToken(storedToken);
+    if (typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem('auth_token');
+      if (storedToken) {
+        verifyToken(storedToken);
+      } else {
+        setIsLoading(false);
+      }
     } else {
       setIsLoading(false);
     }
@@ -48,6 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await fetch('/api/auth/verify', {
         headers: {
           'Authorization': `Bearer ${tokenToVerify}`,
+          'Content-Type': 'application/json',
         },
       });
 
@@ -57,13 +63,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setToken(tokenToVerify);
       } else {
         // Token is invalid, remove it
-        localStorage.removeItem('auth_token');
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('auth_token');
+        }
         setToken(null);
         setUser(null);
       }
     } catch (error) {
       console.error('Token verification failed:', error);
-      localStorage.removeItem('auth_token');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth_token');
+      }
       setToken(null);
       setUser(null);
     } finally {
@@ -86,7 +96,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (response.ok) {
         setUser(data.user);
         setToken(data.token);
-        localStorage.setItem('auth_token', data.token);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('auth_token', data.token);
+        }
         return { success: true };
       } else {
         return { success: false, error: data.error };
@@ -100,7 +112,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem('auth_token');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_token');
+    }
   };
 
   const isAdmin = user?.role === 'admin';
@@ -114,5 +128,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAdmin,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <NoSSR fallback={<div className="min-h-screen bg-gradient-to-b from-[#2a3080] to-[#1e2464] flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+    </div>}>
+      <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+    </NoSSR>
+  );
 };

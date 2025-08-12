@@ -1,5 +1,6 @@
 import dbConnect from '@/utils/dbConnect';
 import Hackathon from '@/models/Hackathon';
+import logger from '@/utils/logger';
 
 // Function to determine current stage based on dates
 const determineCurrentStage = (roundDates) => {
@@ -46,10 +47,9 @@ const determineCurrentStage = (roundDates) => {
 // Main function to update all hackathon stages
 export const updateHackathonStages = async () => {
   const startTime = new Date();
-  console.log(`\n🔄 ===============================================`);
-  console.log(`🔄 STAGE UPDATE CHECK STARTED`);
-  console.log(`🔄 Time: ${startTime.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST`);
-  console.log(`🔄 ===============================================`);
+  logger.info('STAGE UPDATE CHECK STARTED', {
+    time: startTime.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+  });
 
   try {
     await dbConnect();
@@ -59,31 +59,32 @@ export const updateHackathonStages = async () => {
       status: { $in: ['active', 'upcoming'] }
     });
 
-    console.log(`🔍 Found ${hackathons.length} active/upcoming hackathons to check`);
+    logger.info(`Found ${hackathons.length} active/upcoming hackathons to check`);
 
     let updatedCount = 0;
     const updateResults = [];
 
     for (const hackathon of hackathons) {
       try {
-        console.log(`\n🏆 Checking hackathon: ${hackathon.name}`);
-        console.log(`📅 Current stage: ${hackathon.currentStage}`);
+        logger.debug(`Checking hackathon: ${hackathon.name}`, {
+          currentStage: hackathon.currentStage
+        });
 
         if (!hackathon.roundDates) {
-          console.log(`⚠️ No round dates found for ${hackathon.name}, skipping`);
+          logger.warn(`No round dates found for ${hackathon.name}, skipping`);
           continue;
         }
 
         // Determine what the current stage should be
         const newStage = determineCurrentStage(hackathon.roundDates);
-        console.log(`🎯 Calculated stage: ${newStage}`);
+        logger.debug(`Calculated stage: ${newStage} for ${hackathon.name}`);
 
         // Update if stage has changed
         if (hackathon.currentStage !== newStage) {
-          console.log(`🔄 Updating stage from "${hackathon.currentStage}" to "${newStage}"`);
+          logger.info(`Updating stage from "${hackathon.currentStage}" to "${newStage}" for ${hackathon.name}`);
           
           await Hackathon.findByIdAndUpdate(
-            hackathon._id,
+            hackathon.id,
             { currentStage: newStage },
             { new: true }
           );
@@ -96,9 +97,9 @@ export const updateHackathonStages = async () => {
             updated: true
           });
 
-          console.log(`✅ Successfully updated ${hackathon.name} to stage: ${newStage}`);
+          logger.success(`Successfully updated ${hackathon.name} to stage: ${newStage}`);
         } else {
-          console.log(`✓ Stage is already correct for ${hackathon.name}`);
+          logger.debug(`Stage is already correct for ${hackathon.name}`);
           updateResults.push({
             hackathonName: hackathon.name,
             currentStage: hackathon.currentStage,
@@ -107,7 +108,7 @@ export const updateHackathonStages = async () => {
         }
 
       } catch (error) {
-        console.error(`❌ Error updating hackathon ${hackathon.name}:`, error.message);
+        logger.error(`Error updating hackathon ${hackathon.name}:`, error.message);
         updateResults.push({
           hackathonName: hackathon.name,
           error: error.message,
@@ -119,13 +120,12 @@ export const updateHackathonStages = async () => {
     const endTime = new Date();
     const duration = endTime - startTime;
 
-    console.log(`\n📊 ===============================================`);
-    console.log(`📊 STAGE UPDATE SUMMARY`);
-    console.log(`📊 Total hackathons checked: ${hackathons.length}`);
-    console.log(`📊 Stages updated: ${updatedCount}`);
-    console.log(`📊 Duration: ${duration}ms`);
-    console.log(`📊 Completed at: ${endTime.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST`);
-    console.log(`📊 ===============================================\n`);
+    logger.logEvent('stage_update_completed', {
+      totalChecked: hackathons.length,
+      totalUpdated: updatedCount,
+      duration: duration,
+      completedAt: endTime.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+    });
 
     return {
       success: true,
@@ -140,12 +140,11 @@ export const updateHackathonStages = async () => {
     const endTime = new Date();
     const duration = endTime - startTime;
 
-    console.error(`❌ ===============================================`);
-    console.error(`❌ STAGE UPDATE FAILED`);
-    console.error(`❌ Error: ${error.message}`);
-    console.error(`❌ Duration: ${duration}ms`);
-    console.error(`❌ Failed at: ${endTime.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST`);
-    console.error(`❌ ===============================================\n`);
+    logger.error('STAGE UPDATE FAILED', {
+      error: error.message,
+      duration: duration,
+      failedAt: endTime.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+    });
 
     return {
       success: false,

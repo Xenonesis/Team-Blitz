@@ -16,7 +16,7 @@ export async function authenticateToken(request) {
     
     // Connect to database and get user details
     await dbConnect();
-    const user = await User.findById(decoded.userId).select('-password');
+    const user = await User.findById(decoded.userId);
     
     if (!user || !user.isActive) {
       return { error: 'User not found or inactive', status: 401 };

@@ -24,9 +24,9 @@ export async function GET(request) {
     const notificationStatus = hackathons.map(hackathon => {
       const totalParticipants = hackathon.participants.length + 1; // +1 for leader
       const uniqueEmails = new Set([
-        hackathon.leader.email,
+        hackathon.leader?.email,
         ...hackathon.participants.map(p => p.email).filter(Boolean)
-      ]);
+      ].filter(Boolean));
 
       return {
         hackathonId: hackathon.id,

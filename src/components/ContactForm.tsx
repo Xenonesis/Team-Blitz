@@ -7,6 +7,7 @@ export default function ContactForm() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    website: "",
     subject: "",
     message: ""
   });
@@ -14,6 +15,7 @@ export default function ContactForm() {
   const [errors, setErrors] = useState({
     name: "",
     email: "",
+    website: "",
     subject: "",
     message: ""
   });
@@ -27,6 +29,7 @@ export default function ContactForm() {
     const newErrors = {
       name: "",
       email: "",
+      website: "",
       subject: "",
       message: ""
     };
@@ -43,6 +46,12 @@ export default function ContactForm() {
       valid = false;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = "Please enter a valid email address";
+      valid = false;
+    }
+
+    // Website validation (optional)
+    if (formData.website.trim() && !/^https?:\/\/.+\..+/.test(formData.website.trim())) {
+      newErrors.website = "Please enter a valid URL (e.g., https://example.com)";
       valid = false;
     }
 
@@ -89,6 +98,7 @@ export default function ContactForm() {
       setFormData({
         name: "",
         email: "",
+        website: "",
         subject: "",
         message: ""
       });
@@ -146,6 +156,27 @@ export default function ContactForm() {
             <p className="mt-1 text-sm text-red-500">{errors.email}</p>
           )}
         </div>
+      </div>
+
+      {/* Website Field (Optional) */}
+      <div className="mb-6">
+        <label htmlFor="website" className="block text-sm font-medium mb-2 text-white">
+          Website <span className="text-gray-400 text-xs">(optional)</span>
+        </label>
+        <input
+          type="url"
+          id="website"
+          name="website"
+          value={formData.website}
+          onChange={handleChange}
+          className={`w-full px-4 py-3 bg-[#3a4095] border ${
+            errors.website ? "border-red-500" : "border-[#4a50a5]"
+          } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors text-white`}
+          placeholder="https://www.example.com"
+        />
+        {errors.website && (
+          <p className="mt-1 text-sm text-red-500">{errors.website}</p>
+        )}
       </div>
 
       {/* Subject Field */}

@@ -1,52 +1,65 @@
-import mongoose from 'mongoose';
+import { isMockMode, mockDbConnect } from './mockFirebase.js';
 
-const MONGODB_URI = process.env.MONGODB_URI;
+let isConnected = false;
+let connectionPromise = null;
 
-if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable');
-}
-
-let cached = global.mongoose;
-
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
-
+// Firebase connection check
 async function dbConnect() {
-  if (cached.conn) {
-    return cached.conn;
+  // Return existing connection if already connected
+  if (isConnected) {
+    return true;
   }
-
-  if (!cached.promise) {
-    const opts = {
-      bufferCommands: false,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-    };
-
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then(mongoose => mongoose);
+  
+  // Return existing promise if connection is in progress
+  if (connectionPromise) {
+    return connectionPromise;
   }
+  
+  connectionPromise = connectToDatabase();
+  return connectionPromise;
+}
 
+async function connectToDatabase() {
   try {
-    cached.conn = await cached.promise;
+    // Use mock Firebase if credentials are missing
+    if (isMockMode()) {
+      console.log('\n=================================');
+      console.log('\x1b[33m%s\x1b[0m', '⚠️  Mock Firebase Connection (Demo Mode)');
+      console.log('\x1b[33m%s\x1b[0m', '⚠️  Using mock data for testing');
+      console.log('\x1b[33m%s\x1b[0m', '⚠️  Set up real Firebase credentials to use live data');
+      console.log('=================================\n');
+      
+      isConnected = true;
+      return await mockDbConnect();
+    }
+    
+    // Import Firebase Admin only when we have credentials
+    const { adminDb } = await import('./firebaseAdmin');
+    
+    // Test Firebase connection by attempting to read from a collection
+    await adminDb.collection('_connection_test').limit(1).get();
+    
     console.log('\n=================================');
-    console.log('\x1b[32m%s\x1b[0m', '✅ MongoDB Database Connection Status:');
-    console.log('\x1b[32m%s\x1b[0m', '✅ Connected successfully to MongoDB!');
-    console.log('\x1b[32m%s\x1b[0m', `✅ Database URL: ${MONGODB_URI.split('@')[1]}`);
+    console.log('\x1b[32m%s\x1b[0m', '✅ Firebase Database Connection Status:');
+    console.log('\x1b[32m%s\x1b[0m', '✅ Connected successfully to Firebase Firestore!');
+    console.log('\x1b[32m%s\x1b[0m', `✅ Project ID: ${process.env.FIREBASE_PROJECT_ID}`);
     console.log('=================================\n');
-  } catch (e) {
-    cached.promise = null;
+    
+    isConnected = true;
+    return adminDb;
+  } catch (error) {
     console.log('\n=================================');
-    console.error('\x1b[31m%s\x1b[0m', '❌ MongoDB Connection Error:');
-    console.error('\x1b[31m%s\x1b[0m', e);
+    console.error('\x1b[31m%s\x1b[0m', '❌ Firebase Connection Error:');
+    console.error('\x1b[31m%s\x1b[0m', error.message);
+    console.log('\x1b[33m%s\x1b[0m', '💡 Falling back to mock mode for testing...');
     console.log('=================================\n');
-    throw e;
+    
+    // Fall back to mock mode if Firebase fails
+    isConnected = true;
+    return await mockDbConnect();
+  } finally {
+    connectionPromise = null;
   }
-
-  return cached.conn;
 }
 
 export default dbConnect;

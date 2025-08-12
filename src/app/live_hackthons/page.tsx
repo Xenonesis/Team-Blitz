@@ -11,6 +11,8 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
 import NotificationManager from '@/components/NotificationManager';
 import StageUpdateManager from '@/components/StageUpdateManager';
+import EmailAccessControl from '@/components/EmailAccessControl';
+import EmailManagement from '@/components/EmailManagement';
 
 // Constants
 const initialTeamMembers = [
@@ -66,11 +68,11 @@ const HackathonCard: React.FC<HackathonCardProps> = ({
       <div className="flex justify-between items-start mb-3">
         <div className="flex items-center">
           <div className="bg-gray-700 rounded-full w-10 h-10 flex items-center justify-center mr-3">
-            <span className="font-bold text-blue-300">{hackathon.leader.name.charAt(0)}</span>
+            <span className="font-bold text-blue-300">{hackathon.leader?.name?.charAt(0) || 'N'}</span>
           </div>
           <div>
-            <h3 className="font-bold text-white">{hackathon.leader.name}</h3>
-            <p className="text-xs text-blue-300">{hackathon.leader.role}</p>
+            <h3 className="font-bold text-white">{hackathon.leader?.name || 'No Leader'}</h3>
+            <p className="text-xs text-blue-300">{hackathon.leader?.role || ''}</p>
           </div>
         </div>
         
@@ -403,7 +405,8 @@ export default function Page() {
   // Render
   return (
     <ProtectedRoute requireAdmin={true}>
-      <div className="min-h-screen text-white transition-colors duration-500">
+      <EmailAccessControl fallbackMessage="Hackathon Dashboard Access Restricted">
+        <div className="min-h-screen text-white transition-colors duration-500">
       <ParticleBackground />
       <ScrollProgress />
       <Navbar activeSection={activeSection} />
@@ -516,13 +519,13 @@ export default function Page() {
                     <div className="flex items-center">
                       <div className="bg-gray-700 rounded-full w-8 h-8 flex items-center justify-center mr-2">
                         <span className="font-bold text-blue-300">
-                          {selectedHackathon.leader.name.charAt(0)}
+                          {selectedHackathon.leader?.name?.charAt(0) || 'N'}
                         </span>
                       </div>
                       <div>
                         <span className="text-blue-300">Led by </span>
-                        <span className="font-medium">{selectedHackathon.leader.name}</span>
-                        <span className="text-gray-400 ml-2">{selectedHackathon.leader.role}</span>
+                        <span className="font-medium">{selectedHackathon.leader?.name || 'No Leader Assigned'}</span>
+                        <span className="text-gray-400 ml-2">{selectedHackathon.leader?.role || ''}</span>
                       </div>
                     </div>
                   </div>
@@ -631,6 +634,9 @@ export default function Page() {
             </AnimatedElement>
             <AnimatedElement animation="fade-in" duration={1000} delay={200}>
               <StageUpdateManager />
+            </AnimatedElement>
+            <AnimatedElement animation="fade-in" duration={1000} delay={400}>
+              <EmailManagement />
             </AnimatedElement>
           </div>
         </div>
@@ -830,6 +836,7 @@ export default function Page() {
         </div>
       )}
       </div>
+      </EmailAccessControl>
     </ProtectedRoute>
   );
 }

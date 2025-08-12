@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Allow: /projects
+Allow: /contact
+Allow: /live_hackthons
+
+# Disallow admin and API routes
+Disallow: /api/
+Disallow: /admin/
+
+# Sitemap location
+Sitemap: https://your-domain.com/sitemap.xml
