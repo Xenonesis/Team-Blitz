@@ -17,12 +17,20 @@ export async function GET(request) {
     // Get all users from database
     const users = await User.find({});
     
-    // Extract just the email addresses
-    const userEmails = users.map(user => user.email).filter(email => email);
+    // Return user objects with email, role, and other relevant info
+    const userList = users.map(user => ({
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      role: user.role,
+      isActive: user.isActive,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    })).filter(user => user.email);
     
     return NextResponse.json({
-      users: userEmails,
-      count: userEmails.length
+      users: userList,
+      count: userList.length
     });
 
   } catch (error) {

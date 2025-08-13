@@ -11,7 +11,7 @@ export default function AdminPanel() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [allowedEmails, setAllowedEmails] = useState<string[]>([]);
   const [blockedEmails, setBlockedEmails] = useState<string[]>([]);
-  const [allUsers, setAllUsers] = useState<string[]>([]);
+  const [allUsers, setAllUsers] = useState<any[]>([]);
   const [newEmail, setNewEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -222,13 +222,38 @@ export default function AdminPanel() {
     email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const filteredAllUsers = allUsers.filter(email =>
-    email.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredAllUsers = allUsers.filter(user =>
+    user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.role?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const filteredBlockedEmails = blockedEmails.filter(email =>
     email.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Role-based styling functions
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'super_admin':
+        return 'from-purple-500 to-pink-500';
+      case 'admin':
+        return 'from-blue-500 to-indigo-500';
+      default:
+        return 'from-green-500 to-emerald-500';
+    }
+  };
+
+  const getRoleLabel = (role: string) => {
+    switch (role) {
+      case 'super_admin':
+        return 'SUPER ADMIN';
+      case 'admin':
+        return 'ADMIN';
+      default:
+        return 'USER';
+    }
+  };
 
   if (authLoading) {
     return (
@@ -381,7 +406,7 @@ export default function AdminPanel() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-indigo-200 opacity-60 text-sm font-medium">Pending Invites</p>
-                    <p className="text-3xl font-bold text-purple-400 mt-1">{allowedEmails.length - allUsers.filter(user => allowedEmails.includes(user)).length}</p>
+                    <p className="text-3xl font-bold text-purple-400 mt-1">{allowedEmails.length - allUsers.filter(user => allowedEmails.includes(user.email)).length}</p>
                   </div>
                   <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
                     <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -506,7 +531,7 @@ export default function AdminPanel() {
                   ) : (
                     <div className="space-y-3">
                       {filteredAllowedEmails.map((email, index) => {
-                        const isRegisteredUser = allUsers.includes(email);
+                        const isRegisteredUser = allUsers.some(user => user.email === email);
                         return (
                           <div
                             key={index}
@@ -582,19 +607,26 @@ export default function AdminPanel() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {filteredAllUsers.map((email, index) => {
-                      const isAllowed = allowedEmails.includes(email);
-                      const isBlocked = blockedEmails.includes(email);
+                    {filteredAllUsers.map((user, index) => {
+                      const isAllowed = allowedEmails.includes(user.email);
+                      const isBlocked = blockedEmails.includes(user.email);
+
                       return (
                         <div
                           key={index}
                           className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl backdrop-blur-sm hover:bg-white/10 transition-all duration-300"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white text-sm font-medium">
-                              {email.charAt(0).toUpperCase()}
+                            <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${getRoleColor(user.role)} flex items-center justify-center text-white text-sm font-medium`}>
+                              {user.email?.charAt(0).toUpperCase()}
                             </div>
-                            <span className="text-white font-medium">{email}</span>
+                            <div className="flex flex-col">
+                              <span className="text-white font-medium">{user.email}</span>
+                              <span className="text-indigo-200 text-sm opacity-70">{user.username}</span>
+                            </div>
+                            <span className={`text-xs bg-gradient-to-r ${getRoleColor(user.role)} text-white px-3 py-1 rounded-full font-medium`}>
+                              {getRoleLabel(user.role)}
+                            </span>
                             {isAllowed && (
                               <span className="text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full font-medium">
                                 ALLOWED
@@ -614,15 +646,15 @@ export default function AdminPanel() {
                           <div className="flex gap-2">
                             {!isAllowed && !isBlocked && (
                               <button
-                                onClick={() => grantAccess(email)}
+                                onClick={() => grantAccess(user.email)}
                                 className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-lg font-medium transition-all duration-300 transform hover:scale-105"
                               >
                                 Grant Access
                               </button>
                             )}
-                            {isAllowed && (
+                            {isAllowed && user.role !== 'super_admin' && (
                               <button
-                                onClick={() => blockEmail(email)}
+                                onClick={() => blockEmail(user.email)}
                                 className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white rounded-lg font-medium transition-all duration-300 transform hover:scale-105"
                               >
                                 Block
@@ -630,7 +662,7 @@ export default function AdminPanel() {
                             )}
                             {isBlocked && (
                               <button
-                                onClick={() => unblockEmail(email)}
+                                onClick={() => unblockEmail(user.email)}
                                 className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-lg font-medium transition-all duration-300 transform hover:scale-105"
                               >
                                 Unblock
@@ -709,7 +741,7 @@ export default function AdminPanel() {
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
                     <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1721 9z" />
                     </svg>
                   </div>
                   <h2 className="text-xl font-semibold text-white">Password Management</h2>
@@ -722,7 +754,7 @@ export default function AdminPanel() {
                   </div>
                 ) : (
                   <PasswordManager
-                    allowedEmails={allUsers}
+                    allowedEmails={allUsers.map(user => user.email).filter(email => email)}
                     onPasswordUpdate={() => {
                       fetchAllowedEmails();
                       fetchAllUsers();

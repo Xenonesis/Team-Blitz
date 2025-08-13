@@ -49,6 +49,50 @@ const mockData = {
       isActive: true,
       createdAt: new Date(),
       updatedAt: new Date()
+    },
+    {
+      id: 'mock-super-admin-user',
+      username: 'superadmin',
+      email: 'itisaddy7@gmail.com',
+      password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/RK.PqhEIe', // hashed 'admin123'
+      role: 'super_admin',
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+  ],
+  allowed_emails: [
+    {
+      id: 'mock-allowed-1',
+      email: 'itisaddy7@gmail.com',
+      status: 'allowed',
+      addedBy: 'system',
+      addedAt: new Date(),
+      updatedAt: new Date()
+    },
+    {
+      id: 'mock-allowed-2',
+      email: 'aayushtonk02@gmail.com',
+      status: 'allowed',
+      addedBy: 'itisaddy7@gmail.com',
+      addedAt: new Date(),
+      updatedAt: new Date()
+    },
+    {
+      id: 'mock-allowed-3',
+      email: 'admin@teamblitz.com',
+      status: 'allowed',
+      addedBy: 'system',
+      addedAt: new Date(),
+      updatedAt: new Date()
+    },
+    {
+      id: 'mock-blocked-1',
+      email: 'blocked@example.com',
+      status: 'blocked',
+      addedBy: 'itisaddy7@gmail.com',
+      addedAt: new Date(),
+      updatedAt: new Date()
     }
   ],
   teamMembers: [],
@@ -125,14 +169,59 @@ export const mockCollection = (collectionName) => ({
   save: async (data) => {
     console.log(`📋 Mock: Saving to ${collectionName}:`, data);
     if (!mockData[collectionName]) mockData[collectionName] = [];
+    
+    // If item has an ID, update existing item
+    if (data.id) {
+      const index = mockData[collectionName].findIndex(item => item.id === data.id);
+      if (index !== -1) {
+        mockData[collectionName][index] = { ...data };
+        return mockData[collectionName][index];
+      }
+    }
+    
+    // Otherwise, add new item
     const newItem = { ...data, id: data.id || `mock-${Date.now()}` };
     mockData[collectionName].push(newItem);
     return newItem;
   },
   
+  update: async (id, data) => {
+    console.log(`📋 Mock: Updating ${collectionName} ID ${id}:`, data);
+    if (!mockData[collectionName]) mockData[collectionName] = [];
+    
+    const index = mockData[collectionName].findIndex(item => item.id === id);
+    if (index !== -1) {
+      mockData[collectionName][index] = { ...mockData[collectionName][index], ...data };
+      return mockData[collectionName][index];
+    }
+    return null;
+  },
+  
+  deleteOne: async (query) => {
+    console.log(`📋 Mock: Deleting one from ${collectionName} with query:`, query);
+    if (!mockData[collectionName]) return false;
+    
+    const index = mockData[collectionName].findIndex(item => {
+      return Object.entries(query).every(([field, value]) => item[field] === value);
+    });
+    
+    if (index !== -1) {
+      mockData[collectionName].splice(index, 1);
+      return true;
+    }
+    return false;
+  },
+  
   deleteMany: async (query) => {
     console.log(`📋 Mock: Deleting from ${collectionName} with query:`, query);
-    return { deletedCount: 0 };
+    if (!mockData[collectionName]) return { deletedCount: 0 };
+    
+    const initialLength = mockData[collectionName].length;
+    mockData[collectionName] = mockData[collectionName].filter(item => {
+      return !Object.entries(query).every(([field, value]) => item[field] === value);
+    });
+    
+    return { deletedCount: initialLength - mockData[collectionName].length };
   }
 });
 

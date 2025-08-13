@@ -1,6 +1,6 @@
 {
     "name": "hackathon-team-landing",
-    "version": "4.5.1",
+    "version": "11",
     "private": true,
     "scripts": {
         "dev": "next dev -H 0.0.0.0",
