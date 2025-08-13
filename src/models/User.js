@@ -39,7 +39,7 @@ class User {
     // Admins (two specific emails)
     const adminEmails = [
       'itisaddy7@gmail.com',
-      'aayushtonk02@gmail.com'
+      'aayushtonk@02@gmail.com'
     ];
     
     if (adminEmails.includes(normalizedEmail)) {

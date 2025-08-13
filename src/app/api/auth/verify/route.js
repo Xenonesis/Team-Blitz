@@ -15,7 +15,7 @@ export async function GET(request) {
     return NextResponse.json({
       valid: true,
       user: {
-        id: authResult.user._id,
+        id: authResult.user.id,
         username: authResult.user.username,
         email: authResult.user.email,
         role: authResult.user.role

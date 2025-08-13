@@ -15,12 +15,8 @@ export default function AdminLogin() {
   useEffect(() => {
     // Only redirect if user is already logged in AND is a super admin
     if (!authLoading && user) {
-      const superAdminEmails = [
-        'itisaddy7@gmail.com',
-        'aayushtonk@02@gmail.com'
-      ];
-      
-      if (superAdminEmails.includes(user.email?.toLowerCase())) {
+      // Check if user is super admin (only itisaddy7@gmail.com)
+      if (user.email?.toLowerCase() === 'itisaddy7@gmail.com') {
         router.push('/admin');
       }
       // Don't redirect non-super admins - let them stay on login page
@@ -142,17 +138,15 @@ export default function AdminLogin() {
           {/* Info */}
           <div className="text-center space-y-2">
             <p className="text-xs text-gray-500">
-              Only authorized admin users can access this panel
+              Only super admin can access this panel
             </p>
             <div className="text-xs text-gray-600">
-              <p>Super Admin Accounts:</p>
-              <div className="font-mono bg-gray-900 px-2 py-1 rounded mt-1 space-y-1">
-                <p>itisaddy7@gmail.com / SuperAdmin123!</p>
-                <p>aayushtonk@02@gmail.com / SuperAdmin123!</p>
+              <p>Super Admin Account:</p>
+              <div className="font-mono bg-gray-900 px-2 py-1 rounded mt-1">
+                <p>itisaddy7@gmail.com</p>
               </div>
-              <p className="mt-2">Or default dev account:</p>
-              <p className="font-mono bg-gray-900 px-2 py-1 rounded mt-1">
-                admin@teamblitz.com / admin123
+              <p className="mt-2 text-gray-500">
+                Use the same password as for live hackathons page
               </p>
             </div>
           </div>

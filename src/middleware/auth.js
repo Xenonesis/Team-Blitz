@@ -35,7 +35,7 @@ export async function requireAdmin(request) {
     return authResult;
   }
 
-  if (authResult.user.role !== 'admin') {
+  if (authResult.user.role !== 'admin' && authResult.user.role !== 'super_admin') {
     return { error: 'Admin access required', status: 403 };
   }
 

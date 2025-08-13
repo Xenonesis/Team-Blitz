@@ -1,7 +1,6 @@
 // Super Admin emails - only these can access admin panel
 export const SUPER_ADMIN_EMAILS = [
-  'itisaddy7@gmail.com',
-  'aayushtonk@02@gmail.com'
+  'itisaddy7@gmail.com'
 ];
 
 // Allowed emails for hackathon page access

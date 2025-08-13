@@ -88,6 +88,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     const result = await login(email, password);
 
     if (result.success) {
+      // Redirect to the appropriate admin page after successful login
+      if (typeof window !== 'undefined') {
+        window.location.href = '/live_hackthons';
+      }
       onSuccess?.();
     } else {
       setError(result.error || 'Login failed');
