@@ -22,7 +22,7 @@ interface NewUser {
 }
 
 export default function UserManagement() {
-  const { token } = useAuth();
+  const { token, isAdmin, isSuperAdmin } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -64,8 +64,15 @@ export default function UserManagement() {
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, [token]);
+    if (isAdmin || isSuperAdmin) {
+      fetchUsers();
+    }
+  }, [token, isAdmin, isSuperAdmin]);
+
+  // Don't render for non-admin users
+  if (!isAdmin && !isSuperAdmin) {
+    return null;
+  }
 
   // Clear messages after 5 seconds
   useEffect(() => {

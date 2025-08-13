@@ -3,7 +3,7 @@ console.log('🔧 CREATING REAL USERS FROM ALLOWED EMAILS');
 console.log('==========================================\n');
 
 const allowedEmails = [
-  'aayushtonk@02@gmail.com',
+  'aayushtonk02@gmail.com',
   'itisaddy7@gmail.com', 
   'ashwinisj2005@gmail.com',
   'officialprachi1211@gmail.com',
@@ -34,7 +34,7 @@ async function createUsersFromEmails() {
       const defaultPassword = 'teamblitz2025';
       
       // Determine role (admins vs regular users)
-      const adminEmails = ['aayushtonk@02@gmail.com', 'itisaddy7@gmail.com', 'admin@teamblitz.com'];
+      const adminEmails = ['aayushtonk02@gmail.com', 'itisaddy7@gmail.com', 'admin@teamblitz.com'];
       const role = adminEmails.includes(email) ? 'admin' : 'user';
       
       const userData = {
@@ -81,7 +81,7 @@ async function createUsersFromEmails() {
     console.log('\n📋 DEFAULT CREDENTIALS:');
     console.log('Password for all users: teamblitz2025');
     console.log('\n🔑 ADMIN USERS:');
-    console.log('- aayushtonk@02@gmail.com');
+    console.log('- aayushtonk02@gmail.com');
     console.log('- itisaddy7@gmail.com');
     console.log('- admin@teamblitz.com');
     console.log('\n👤 REGULAR USERS:');

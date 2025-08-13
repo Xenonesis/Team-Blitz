@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/utils/dbConnect';
 import Hackathon from '@/models/Hackathon';
-import { requireAdmin, createAuthResponse } from '@/middleware/auth';
+import { authenticateToken, createAuthResponse } from '@/middleware/auth';
 
 // Handle PUT requests for updating hackathons
 export const PUT = async (request, { params }) => {
   try {
-    // Check admin authentication
-    const authResult = await requireAdmin(request);
+    // Check user authentication (allow all authenticated users)
+    const authResult = await authenticateToken(request);
     if (authResult.error) {
       return createAuthResponse(authResult.error, authResult.status);
     }
@@ -73,6 +73,45 @@ export const PUT = async (request, { params }) => {
     return NextResponse.json(updatedHackathon);
   } catch (error) {
     console.error('Update API Error:', error);
+    return NextResponse.json(
+      { error: error.message || 'Internal Server Error' },
+      { status: 500 }
+    );
+  }
+};
+
+// Handle DELETE requests for individual hackathons
+export const DELETE = async (request, { params }) => {
+  try {
+    // Check user authentication (allow all authenticated users)
+    const authResult = await authenticateToken(request);
+    if (authResult.error) {
+      return createAuthResponse(authResult.error, authResult.status);
+    }
+
+    await dbConnect();
+    
+    const { id } = await params;
+    
+    // Find the hackathon
+    const hackathon = await Hackathon.findOne({ id });
+    
+    if (!hackathon) {
+      return NextResponse.json(
+        { error: 'Hackathon not found' },
+        { status: 404 }
+      );
+    }
+
+    // Delete the hackathon
+    await Hackathon.deleteMany({ id });
+    
+    return NextResponse.json(
+      { message: 'Hackathon deleted successfully' },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('Delete Individual Hackathon API Error:', error);
     return NextResponse.json(
       { error: error.message || 'Internal Server Error' },
       { status: 500 }

@@ -6,12 +6,13 @@ export const SUPER_ADMIN_EMAILS = [
 // Allowed emails for hackathon page access
 export const ALLOWED_EMAILS = [
   // Team Blitz Core Team
-  'aayushtonk@02@gmail.com',
+  'aayushtonk02@gmail.com',
   'itisaddy7@gmail.com',
   'ashwinisj2005@gmail.com',
   'officialprachi1211@gmail.com',
   'alimuneerali245@gmail.com',
   'ashmes16@gmail.com',
+  'jordan@team.com',
   'swati01mishra01@gmail.com',
   
   // Additional authorized emails

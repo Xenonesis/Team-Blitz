@@ -2,7 +2,7 @@ console.log('🎉 USER CREATION SUMMARY');
 console.log('========================\n');
 
 console.log('✅ SUCCESSFULLY CREATED:');
-console.log('1. aayushtonk@02@gmail.com (admin) - Already existed');
+console.log('1. aayushtonk02@gmail.com (admin) - Already existed');
 console.log('2. itisaddy7@gmail.com (admin) - Already existed');
 console.log('3. ashwinisj2005@gmail.com (user) - Created earlier');
 console.log('4. officialprachi1211@gmail.com (user) - ✅ Just created');

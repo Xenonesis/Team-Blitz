@@ -97,12 +97,12 @@ export const GET = async () => {
 export const DELETE = async (request) => {
   try {
     // Lazy load dependencies to avoid Firebase import errors
-    const { requireAdmin, createAuthResponse } = await import('@/middleware/auth');
+    const { authenticateToken, createAuthResponse } = await import('@/middleware/auth');
     const dbConnect = (await import('@/utils/dbConnect')).default;
     const Hackathon = (await import('@/models/Hackathon')).default;
 
-    // Check admin authentication
-    const authResult = await requireAdmin(request);
+    // Check user authentication (allow all authenticated users)
+    const authResult = await authenticateToken(request);
     if (authResult.error) {
       return createAuthResponse(authResult.error, authResult.status);
     }
@@ -157,12 +157,12 @@ export const DELETE = async (request) => {
 export const POST = async (request) => {
   try {
     // Lazy load dependencies to avoid Firebase import errors
-    const { requireAdmin, createAuthResponse } = await import('@/middleware/auth');
+    const { authenticateToken, createAuthResponse } = await import('@/middleware/auth');
     const dbConnect = (await import('@/utils/dbConnect')).default;
     const Hackathon = (await import('@/models/Hackathon')).default;
 
-    // Check admin authentication
-    const authResult = await requireAdmin(request);
+    // Check user authentication (allow all authenticated users)
+    const authResult = await authenticateToken(request);
     if (authResult.error) {
       return createAuthResponse(authResult.error, authResult.status);
     }

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function EmailManagement() {
-  const { token } = useAuth();
+  const { token, isAdmin, isSuperAdmin } = useAuth();
   const [allowedEmails, setAllowedEmails] = useState<string[]>([]);
   const [newEmail, setNewEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -12,10 +12,15 @@ export default function EmailManagement() {
   const [showManager, setShowManager] = useState(false);
 
   useEffect(() => {
-    if (showManager) {
+    if (showManager && (isAdmin || isSuperAdmin)) {
       fetchAllowedEmails();
     }
-  }, [showManager]);
+  }, [showManager, isAdmin, isSuperAdmin]);
+
+  // Don't render for non-admin users
+  if (!isAdmin && !isSuperAdmin) {
+    return null;
+  }
 
   const fetchAllowedEmails = async () => {
     try {

@@ -35,7 +35,7 @@ interface UpdateResult {
 }
 
 const StageUpdateManager: React.FC = () => {
-  const { token } = useAuth();
+  const { token, isAdmin, isSuperAdmin } = useAuth();
   const [status, setStatus] = useState<StageUpdateStatus | null>(null);
   const [loading, setLoading] = useState(false);
   const [updateResult, setUpdateResult] = useState<UpdateResult | null>(null);
@@ -149,11 +149,18 @@ const StageUpdateManager: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchStatus();
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(fetchStatus, 30000);
-    return () => clearInterval(interval);
-  }, [token]);
+    if (isAdmin || isSuperAdmin) {
+      fetchStatus();
+      // Auto-refresh every 30 seconds
+      const interval = setInterval(fetchStatus, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [token, isAdmin, isSuperAdmin]);
+
+  // Don't render for non-admin users
+  if (!isAdmin && !isSuperAdmin) {
+    return null;
+  }
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('en-IN', {

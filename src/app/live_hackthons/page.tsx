@@ -17,7 +17,7 @@ import UserManagement from '@/components/UserManagement';
 
 // Constants
 const initialTeamMembers = [
-  { id: 'member1', name: 'Aayush Tonk', role: 'TeamBlitz Backend Developer', email: 'aayushtonk@02@gmail.com', skills: 'System Architect, Backend Developer' },
+  { id: 'member1', name: 'Aayush Tonk', role: 'TeamBlitz Backend Developer', email: 'aayushtonk02@gmail.com', skills: 'System Architect, Backend Developer' },
   { id: 'member2', name: 'Aditya Tiwari', role: 'TeamBlitz CEO & Cybersecurity mentor', email: 'itisaddy7@gmail.com', skills: 'Cybersecurity, Full Stack Development , DevOps' },
   { id: 'member3', name: 'Ashwini Jaiswal', role: 'TeamBlitz UI/UX designer', email: 'ashwinisj2005@gmail.com', skills: 'UI/UX Designer , Frontend Developer' },
   { id: 'member4', name: 'Prachi Upadhyay', role: 'Team-Follow Up', email: 'officialprachi1211@gmail.com', skills: 'AI/ML Engineer , Data Scientist' },

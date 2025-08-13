@@ -24,7 +24,7 @@ interface NotificationStatus {
 }
 
 const NotificationManager: React.FC = () => {
-  const { token } = useAuth();
+  const { token, isAdmin, isSuperAdmin } = useAuth();
   const [status, setStatus] = useState<NotificationStatus | null>(null);
   const [loading, setLoading] = useState(false);
   const [sendResult, setSendResult] = useState<string>('');
@@ -171,10 +171,17 @@ const NotificationManager: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchStatus();
-    fetchSchedulerStatus();
-    fetchCleanupStatus();
-  }, [token]);
+    if (isAdmin || isSuperAdmin) {
+      fetchStatus();
+      fetchSchedulerStatus();
+      fetchCleanupStatus();
+    }
+  }, [token, isAdmin, isSuperAdmin]);
+
+  // Don't render for non-admin users
+  if (!isAdmin && !isSuperAdmin) {
+    return null;
+  }
 
   if (loading) {
     return (

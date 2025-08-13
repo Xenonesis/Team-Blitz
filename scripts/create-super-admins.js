@@ -38,7 +38,7 @@ async function createSuperAdmins() {
       },
       {
         username: 'aayush',
-        email: 'aayushtonk@02@gmail.com',
+        email: 'aayushtonk02@gmail.com',
         password: 'admin123',
         role: 'admin'
       }
@@ -83,7 +83,7 @@ async function createSuperAdmins() {
     console.log('   Email: itisaddy7@gmail.com');
     console.log('   Password: admin123');
     console.log('');
-    console.log('   Email: aayushtonk@02@gmail.com');
+    console.log('   Email: aayushtonk02@gmail.com');
     console.log('   Password: admin123');
     
     console.log('\n⚠️  Security Notes:');

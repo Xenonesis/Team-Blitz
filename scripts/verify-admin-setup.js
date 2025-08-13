@@ -50,7 +50,7 @@ async function verifyAdminSetup() {
 
     // Check admin
     const adminQuery = await db.collection('users')
-      .where('email', '==', 'aayushtonk@02@gmail.com')
+      .where('email', '==', 'aayushtonk02@gmail.com')
       .limit(1)
       .get();
 
@@ -73,7 +73,7 @@ async function verifyAdminSetup() {
     console.log('   🌐 Access: /admin + /live_hackthons');
     console.log('');
     console.log('Admin:');
-    console.log('   📧 Email: aayushtonk@02@gmail.com');
+    console.log('   📧 Email: aayushtonk02@gmail.com');
     console.log('   🔑 Password: admin123 (or SuperAdmin123! or teamblitz2025)');
     console.log('   🌐 Access: /live_hackthons only');
 
@@ -84,7 +84,7 @@ async function verifyAdminSetup() {
     console.log('3. Go to /admin/login');
     console.log('4. Login with itisaddy7@gmail.com');
     console.log('5. Should be redirected to /admin successfully');
-    console.log('6. Try logging in with aayushtonk@02@gmail.com');
+    console.log('6. Try logging in with aayushtonk02@gmail.com');
     console.log('7. Should be blocked from /admin but can access /live_hackthons');
 
   } catch (error) {

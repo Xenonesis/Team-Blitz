@@ -31,7 +31,7 @@ async function createSuperAdminUsers() {
 
     const superAdminEmails = [
       'itisaddy7@gmail.com',
-      'aayushtonk@02@gmail.com'
+      'aayushtonk02@gmail.com'
     ];
 
     const defaultPassword = 'SuperAdmin123!';

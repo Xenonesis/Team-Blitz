@@ -56,7 +56,7 @@ async function debugLogin() {
 async function testAdminLogin() {
   console.log('\n🔧 Testing with known admin account...');
   
-  const adminEmail = 'aayushtonk@02@gmail.com';
+  const adminEmail = 'aayushtonk02@gmail.com';
   const adminPassword = 'teamblitz2025';
   
   try {

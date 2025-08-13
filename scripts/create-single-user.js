@@ -27,7 +27,7 @@ async function createSingleUser(email) {
     const defaultPassword = 'teamblitz2025';
     
     // Determine role
-    const adminEmails = ['admin@teamblitz.com', 'aayushtonk@02@gmail.com', 'itisaddy7@gmail.com'];
+    const adminEmails = ['admin@teamblitz.com', 'aayushtonk02@gmail.com', 'itisaddy7@gmail.com'];
     const role = adminEmails.includes(email) ? 'admin' : 'user';
     
     const userData = {

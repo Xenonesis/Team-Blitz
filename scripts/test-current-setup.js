@@ -2,7 +2,7 @@ console.log('🧪 TEST CURRENT SETUP');
 console.log('====================\n');
 
 console.log('✅ USERS THAT SHOULD EXIST:');
-console.log('1. aayushtonk@02@gmail.com (admin)');
+console.log('1. aayushtonk02@gmail.com (admin)');
 console.log('2. itisaddy7@gmail.com (admin)');
 console.log('3. ashwinisj2005@gmail.com (user)');
 console.log('\n🎯 TESTING INSTRUCTIONS:');
