@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/utils/dbConnect';
 import User from '@/models/User';
 import { generateToken } from '@/utils/jwt';
+import { isEmailAllowed } from '@/utils/emailAccess';
 
 export async function POST(request) {
   try {
@@ -15,6 +16,17 @@ export async function POST(request) {
         { error: 'Username, email, and password are required' },
         { status: 400 }
       );
+    }
+
+    // Check if email is allowed to register (unless creating admin with secret)
+    if (role !== 'admin') {
+      const emailAllowed = await isEmailAllowed(email.toLowerCase().trim());
+      if (!emailAllowed) {
+        return NextResponse.json(
+          { error: 'This email is not authorized to register. Please contact an administrator.' },
+          { status: 403 }
+        );
+      }
     }
 
     // If trying to create admin, check admin secret

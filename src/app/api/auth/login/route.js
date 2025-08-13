@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/utils/dbConnect';
 import User from '@/models/User';
 import { generateToken } from '@/utils/jwt';
+import { isEmailAllowed } from '@/utils/emailAccess';
 
 export async function POST(request) {
   try {
@@ -32,6 +33,18 @@ export async function POST(request) {
         { error: 'Account is deactivated' },
         { status: 401 }
       );
+    }
+
+    // Check if email is still allowed (not blocked)
+    // Skip this check for admins and super admins
+    if (user.role !== 'admin' && user.role !== 'super_admin') {
+      const emailAllowed = await isEmailAllowed(user.email);
+      if (!emailAllowed) {
+        return NextResponse.json(
+          { error: 'Access has been revoked for this email. Please contact an administrator.' },
+          { status: 403 }
+        );
+      }
     }
 
     // Verify password

@@ -61,10 +61,20 @@ export async function POST(request) {
     const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-    // Update password in database
-    userToUpdate.password = hashedPassword;
-    userToUpdate.updatedAt = new Date();
-    await userToUpdate.save();
+    // Update only the password and updatedAt fields
+    const updateData = {
+      password: hashedPassword,
+      updatedAt: new Date()
+    };
+    
+    if (require('@/utils/mockFirebase').isMockMode()) {
+      const { mockCollection } = require('@/utils/mockFirebase');
+      const db = mockCollection('users');
+      await db.update(userToUpdate.id, updateData);
+    } else {
+      const { adminDb } = await import('@/utils/firebaseAdmin');
+      await adminDb.collection('users').doc(userToUpdate.id).update(updateData);
+    }
 
     return NextResponse.json({
       message: targetEmail 

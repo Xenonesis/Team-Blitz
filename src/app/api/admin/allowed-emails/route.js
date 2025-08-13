@@ -1,37 +1,34 @@
 import { NextResponse } from 'next/server';
-import { 
-  ALLOWED_EMAILS, 
-  BLOCKED_EMAILS,
-  isEmailAllowed, 
-  addAllowedEmail, 
-  removeAllowedEmail,
-  blockEmail,
-  unblockEmail,
-  isSuperAdmin 
-} from '@/config/allowedEmails';
-import { verifyToken } from '@/utils/auth';
+import { requireAdmin } from '@/middleware/auth';
+import AllowedEmail from '@/models/AllowedEmail';
+import { isSuperAdmin } from '@/config/allowedEmails';
 
 // GET - List all allowed emails and blocked emails (super admin only)
 export async function GET(request) {
   try {
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'No token provided' }, { status: 401 });
+    // Verify admin authentication
+    const authResult = await requireAdmin(request);
+    if (authResult.error) {
+      return NextResponse.json(
+        { error: authResult.error },
+        { status: authResult.status }
+      );
     }
 
-    const token = authHeader.split(' ')[1];
-    const decoded = verifyToken(token);
-    
-    // Check if user is super admin
-    if (!decoded || !isSuperAdmin(decoded.email)) {
+    // Additional check for super admin
+    if (!isSuperAdmin(authResult.user.email)) {
       return NextResponse.json({ error: 'Super admin access required' }, { status: 403 });
     }
 
+    // Get emails from database
+    const allowedEmails = await AllowedEmail.getAllowedEmails();
+    const blockedEmails = await AllowedEmail.getBlockedEmails();
+
     return NextResponse.json({ 
-      allowedEmails: ALLOWED_EMAILS,
-      blockedEmails: BLOCKED_EMAILS,
-      count: ALLOWED_EMAILS.length,
-      blockedCount: BLOCKED_EMAILS.length
+      allowedEmails,
+      blockedEmails,
+      count: allowedEmails.length,
+      blockedCount: blockedEmails.length
     });
   } catch (error) {
     console.error('Error fetching allowed emails:', error);
@@ -42,16 +39,17 @@ export async function GET(request) {
 // POST - Add new allowed email or manage blocking (super admin only)
 export async function POST(request) {
   try {
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'No token provided' }, { status: 401 });
+    // Verify admin authentication
+    const authResult = await requireAdmin(request);
+    if (authResult.error) {
+      return NextResponse.json(
+        { error: authResult.error },
+        { status: authResult.status }
+      );
     }
 
-    const token = authHeader.split(' ')[1];
-    const decoded = verifyToken(token);
-    
-    // Check if user is super admin
-    if (!decoded || !isSuperAdmin(decoded.email)) {
+    // Additional check for super admin
+    if (!isSuperAdmin(authResult.user.email)) {
       return NextResponse.json({ error: 'Super admin access required' }, { status: 403 });
     }
 
@@ -69,49 +67,48 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
     }
 
-    // Handle different actions
-    if (action === 'block') {
-      const blocked = blockEmail(normalizedEmail);
-      if (blocked) {
+    try {
+      // Handle different actions
+      if (action === 'block') {
+        await AllowedEmail.blockEmail(normalizedEmail, authResult.user.email);
+        const allowedEmails = await AllowedEmail.getAllowedEmails();
+        const blockedEmails = await AllowedEmail.getBlockedEmails();
+        
         return NextResponse.json({ 
           message: 'Email blocked successfully',
           email: normalizedEmail,
-          allowedEmails: ALLOWED_EMAILS,
-          blockedEmails: BLOCKED_EMAILS
+          allowedEmails,
+          blockedEmails
         });
-      } else {
-        return NextResponse.json({ error: 'Email already blocked or failed to block' }, { status: 409 });
-      }
-    } else if (action === 'unblock') {
-      const unblocked = unblockEmail(normalizedEmail);
-      if (unblocked) {
+      } else if (action === 'unblock') {
+        await AllowedEmail.addEmail(normalizedEmail, authResult.user.email);
+        const allowedEmails = await AllowedEmail.getAllowedEmails();
+        const blockedEmails = await AllowedEmail.getBlockedEmails();
+        
         return NextResponse.json({ 
           message: 'Email unblocked successfully',
           email: normalizedEmail,
-          allowedEmails: ALLOWED_EMAILS,
-          blockedEmails: BLOCKED_EMAILS
+          allowedEmails,
+          blockedEmails
         });
       } else {
-        return NextResponse.json({ error: 'Email not found in blocked list' }, { status: 404 });
-      }
-    } else {
-      // Default action: add to allowed list
-      if (ALLOWED_EMAILS.includes(normalizedEmail)) {
-        return NextResponse.json({ error: 'Email already in allowed list' }, { status: 409 });
-      }
-
-      const added = addAllowedEmail(normalizedEmail);
-      
-      if (added) {
+        // Default action: add to allowed list
+        await AllowedEmail.addEmail(normalizedEmail, authResult.user.email);
+        const allowedEmails = await AllowedEmail.getAllowedEmails();
+        const blockedEmails = await AllowedEmail.getBlockedEmails();
+        
         return NextResponse.json({ 
           message: 'Email added successfully',
           email: normalizedEmail,
-          allowedEmails: ALLOWED_EMAILS,
-          blockedEmails: BLOCKED_EMAILS
+          allowedEmails,
+          blockedEmails
         });
-      } else {
-        return NextResponse.json({ error: 'Failed to add email' }, { status: 500 });
       }
+    } catch (dbError) {
+      if (dbError.message.includes('already in allowed list')) {
+        return NextResponse.json({ error: dbError.message }, { status: 409 });
+      }
+      throw dbError;
     }
   } catch (error) {
     console.error('Error managing email:', error);
@@ -122,16 +119,17 @@ export async function POST(request) {
 // DELETE - Remove allowed email (super admin only)
 export async function DELETE(request) {
   try {
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'No token provided' }, { status: 401 });
+    // Verify admin authentication
+    const authResult = await requireAdmin(request);
+    if (authResult.error) {
+      return NextResponse.json(
+        { error: authResult.error },
+        { status: authResult.status }
+      );
     }
 
-    const token = authHeader.split(' ')[1];
-    const decoded = verifyToken(token);
-    
-    // Check if user is super admin
-    if (!decoded || !isSuperAdmin(decoded.email)) {
+    // Additional check for super admin
+    if (!isSuperAdmin(authResult.user.email)) {
       return NextResponse.json({ error: 'Super admin access required' }, { status: 403 });
     }
 
@@ -143,14 +141,17 @@ export async function DELETE(request) {
 
     const normalizedEmail = email.toLowerCase().trim();
     
-    const removed = removeAllowedEmail(normalizedEmail);
+    const removed = await AllowedEmail.removeEmail(normalizedEmail);
     
     if (removed) {
+      const allowedEmails = await AllowedEmail.getAllowedEmails();
+      const blockedEmails = await AllowedEmail.getBlockedEmails();
+      
       return NextResponse.json({ 
         message: 'Email removed successfully',
         email: normalizedEmail,
-        allowedEmails: ALLOWED_EMAILS,
-        blockedEmails: BLOCKED_EMAILS
+        allowedEmails,
+        blockedEmails
       });
     } else {
       return NextResponse.json({ error: 'Email not found in allowed list' }, { status: 404 });

@@ -18,11 +18,36 @@ class User {
     this.username = data.username;
     this.email = data.email?.toLowerCase();
     this.password = data.password;
-    this.role = data.role || 'user';
+    this.role = data.role || this.determineRoleByEmail(this.email);
     this.isActive = data.isActive !== undefined ? data.isActive : true;
     this.createdAt = data.createdAt || new Date();
     this.updatedAt = data.updatedAt || new Date();
     this.id = data.id;
+  }
+
+  // Determine role based on email
+  determineRoleByEmail(email) {
+    if (!email) return 'user';
+    
+    const normalizedEmail = email.toLowerCase();
+    
+    // Super admin (only one)
+    if (normalizedEmail === 'itisaddy7@gmail.com') {
+      return 'super_admin';
+    }
+    
+    // Admins (two specific emails)
+    const adminEmails = [
+      'itisaddy7@gmail.com',
+      'aayushtonk02@gmail.com'
+    ];
+    
+    if (adminEmails.includes(normalizedEmail)) {
+      return 'admin';
+    }
+    
+    // All other emails are users by default
+    return 'user';
   }
 
   // Validation
@@ -41,8 +66,8 @@ class User {
       errors.push('Password must be at least 6 characters');
     }
     
-    if (!['admin', 'user'].includes(this.role)) {
-      errors.push('Role must be either admin or user');
+    if (!['super_admin', 'admin', 'user'].includes(this.role)) {
+      errors.push('Role must be super_admin, admin, or user');
     }
     
     return errors;

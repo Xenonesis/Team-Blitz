@@ -13,6 +13,7 @@ import NotificationManager from '@/components/NotificationManager';
 import StageUpdateManager from '@/components/StageUpdateManager';
 import EmailAccessControl from '@/components/EmailAccessControl';
 import EmailManagement from '@/components/EmailManagement';
+import UserManagement from '@/components/UserManagement';
 
 // Constants
 const initialTeamMembers = [
@@ -403,7 +404,7 @@ export default function Page() {
 
   // Render
   return (
-    <ProtectedRoute requireAdmin={true}>
+    <ProtectedRoute>
       <EmailAccessControl fallbackMessage="Hackathon Dashboard Access Restricted">
         <div className="min-h-screen text-white transition-colors duration-500">
           <ParticleBackground />
@@ -632,6 +633,9 @@ export default function Page() {
                 </AnimatedElement>
                 <AnimatedElement animation="fade-in" duration={1000} delay={400}>
                   <EmailManagement />
+                </AnimatedElement>
+                <AnimatedElement animation="fade-in" duration={1000} delay={600}>
+                  <UserManagement />
                 </AnimatedElement>
               </div>
             </div>

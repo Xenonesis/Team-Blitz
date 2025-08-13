@@ -1,105 +1,118 @@
-const admin = require('firebase-admin');
 const bcrypt = require('bcryptjs');
-require('dotenv').config({ path: '.env.local' });
 
-// Initialize Firebase Admin
-if (!admin.apps.length) {
-  const serviceAccount = {
-    type: "service_account",
-    project_id: process.env.FIREBASE_PROJECT_ID,
-    private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
-    private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    client_email: process.env.FIREBASE_CLIENT_EMAIL,
-    client_id: process.env.FIREBASE_CLIENT_ID,
-    auth_uri: "https://accounts.google.com/o/oauth2/auth",
-    token_uri: "https://oauth2.googleapis.com/token",
-    auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
-    client_x509_cert_url: `https://www.googleapis.com/robot/v1/metadata/x509/${process.env.FIREBASE_CLIENT_EMAIL}`
-  };
-
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    projectId: process.env.FIREBASE_PROJECT_ID,
-  });
-}
-
-const db = admin.firestore();
-
+// Test script to verify password updates are working
 async function testPasswordUpdate() {
+  console.log('🔍 Testing Password Update Functionality...\n');
+  
   try {
-    console.log('🧪 Testing password update functionality...');
-
-    // Test 1: Check if admin users exist
-    console.log('\n📋 Test 1: Checking existing admin users...');
+    // Import required modules
+    const { isMockMode } = require('../src/utils/mockFirebase');
+    const User = require('../src/models/User').default;
     
-    const adminEmails = [
-      'admin@teamblitz.com',
-      'itisaddy7@gmail.com',
-      'aayushtonk@02@gmail.com'
-    ];
-
-    for (const email of adminEmails) {
-      const userSnapshot = await db.collection('users')
-        .where('email', '==', email)
-        .limit(1)
-        .get();
+    console.log(`📊 Database Mode: ${isMockMode() ? 'Mock (Demo)' : 'Firebase (Live)'}`);
+    
+    // Test 1: Find the user we're updating
+    const testEmail = 'ashmes16@gmail.com';
+    console.log(`\n1️⃣ Looking for user: ${testEmail}`);
+    
+    const user = await User.findOne({ email: testEmail });
+    if (!user) {
+      console.log('❌ User not found! Creating test user...');
       
-      if (!userSnapshot.empty) {
-        const userData = userSnapshot.docs[0].data();
-        console.log(`✅ Found user: ${email} (Role: ${userData.role})`);
-      } else {
-        console.log(`❌ User not found: ${email}`);
-      }
-    }
-
-    // Test 2: Test password hashing
-    console.log('\n📋 Test 2: Testing password hashing...');
-    const testPassword = 'TestPassword123!';
-    const salt = await bcrypt.genSalt(12);
-    const hashedPassword = await bcrypt.hash(testPassword, salt);
-    console.log(`✅ Password hashing works: ${hashedPassword.substring(0, 20)}...`);
-
-    // Test 3: Test password comparison
-    console.log('\n📋 Test 3: Testing password comparison...');
-    const isMatch = await bcrypt.compare(testPassword, hashedPassword);
-    console.log(`✅ Password comparison works: ${isMatch}`);
-
-    // Test 4: Test updating a user's password (simulation)
-    console.log('\n📋 Test 4: Testing password update simulation...');
-    const adminUser = await db.collection('users')
-      .where('email', '==', 'admin@teamblitz.com')
-      .limit(1)
-      .get();
-
-    if (!adminUser.empty) {
-      const userDoc = adminUser.docs[0];
-      const userData = userDoc.data();
-      
-      // Simulate password update
-      const newPassword = 'NewTestPassword123!';
-      const newSalt = await bcrypt.genSalt(12);
-      const newHashedPassword = await bcrypt.hash(newPassword, newSalt);
-      
-      console.log(`✅ Would update password for: ${userData.email}`);
-      console.log(`✅ New hashed password: ${newHashedPassword.substring(0, 20)}...`);
-      console.log(`✅ Password update simulation successful`);
+      // Create a test user if not exists
+      const newUser = new User({
+        username: 'testuser',
+        email: testEmail,
+        password: 'oldpassword123',
+        role: 'user'
+      });
+      await newUser.save();
+      console.log('✅ Test user created');
     } else {
-      console.log(`❌ Admin user not found for password update test`);
+      console.log('✅ User found:', {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role
+      });
     }
-
-    console.log('\n🎉 All password update tests completed!');
-    console.log('\n📝 Summary:');
-    console.log('   ✅ User lookup works');
-    console.log('   ✅ Password hashing works');
-    console.log('   ✅ Password comparison works');
-    console.log('   ✅ Password update logic works');
-    console.log('\n🌐 The password management feature should work correctly!');
-
+    
+    // Test 2: Check current password hash
+    const currentUser = await User.findOne({ email: testEmail });
+    console.log('\n2️⃣ Current password hash (first 20 chars):', currentUser.password.substring(0, 20) + '...');
+    
+    // Test 3: Test password comparison with current password
+    console.log('\n3️⃣ Testing password comparison...');
+    const testPasswords = ['qwerty', 'oldpassword123', 'wrongpassword'];
+    
+    for (const testPass of testPasswords) {
+      const isMatch = await currentUser.comparePassword(testPass);
+      console.log(`   Password "${testPass}": ${isMatch ? '✅ MATCH' : '❌ NO MATCH'}`);
+    }
+    
+    // Test 4: Simulate the password update process
+    console.log('\n4️⃣ Simulating password update to "qwerty"...');
+    
+    const newPassword = 'qwerty';
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    
+    console.log('   New password hash (first 20 chars):', hashedPassword.substring(0, 20) + '...');
+    
+    // Update the password directly in database (same as API does)
+    const updateData = {
+      password: hashedPassword,
+      updatedAt: new Date()
+    };
+    
+    if (isMockMode()) {
+      const { mockCollection } = require('../src/utils/mockFirebase');
+      const db = mockCollection('users');
+      await db.update(currentUser.id, updateData);
+    } else {
+      const { adminDb } = await import('../src/utils/firebaseAdmin');
+      await adminDb.collection('users').doc(currentUser.id).update(updateData);
+    }
+    
+    console.log('✅ Password updated in database');
+    
+    // Test 5: Verify the update worked
+    console.log('\n5️⃣ Verifying password update...');
+    
+    const updatedUser = await User.findOne({ email: testEmail });
+    console.log('   Updated password hash (first 20 chars):', updatedUser.password.substring(0, 20) + '...');
+    
+    // Test the new password
+    const newPasswordWorks = await updatedUser.comparePassword('qwerty');
+    const oldPasswordWorks = await updatedUser.comparePassword('oldpassword123');
+    
+    console.log(`   New password "qwerty": ${newPasswordWorks ? '✅ WORKS' : '❌ FAILED'}`);
+    console.log(`   Old password "oldpassword123": ${oldPasswordWorks ? '❌ STILL WORKS (BAD!)' : '✅ CORRECTLY BLOCKED'}`);
+    
+    // Test 6: Final verification
+    console.log('\n6️⃣ Final Test Results:');
+    if (newPasswordWorks && !oldPasswordWorks) {
+      console.log('🎉 SUCCESS: Password update is working correctly!');
+      console.log('   ✅ New password works');
+      console.log('   ✅ Old password is blocked');
+      console.log('   ✅ Password hash changed in database');
+    } else {
+      console.log('❌ FAILURE: Password update has issues!');
+      if (!newPasswordWorks) console.log('   ❌ New password does not work');
+      if (oldPasswordWorks) console.log('   ❌ Old password still works');
+    }
+    
   } catch (error) {
-    console.error('❌ Test failed:', error);
-  } finally {
-    process.exit(0);
+    console.error('❌ Test failed with error:', error.message);
+    console.error('Stack trace:', error.stack);
   }
 }
 
-testPasswordUpdate();
+// Run the test
+testPasswordUpdate().then(() => {
+  console.log('\n🏁 Test completed');
+  process.exit(0);
+}).catch(error => {
+  console.error('💥 Test crashed:', error);
+  process.exit(1);
+});

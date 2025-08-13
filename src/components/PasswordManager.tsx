@@ -14,6 +14,15 @@ export default function PasswordManager({ allowedEmails, onPasswordUpdate }: Pas
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   
+  // Password visibility states
+  const [showPasswords, setShowPasswords] = useState({
+    currentPassword: false,
+    ownNewPassword: false,
+    ownConfirmPassword: false,
+    otherNewPassword: false,
+    otherConfirmPassword: false
+  });
+  
   // Own password form
   const [ownPasswordForm, setOwnPasswordForm] = useState({
     currentPassword: '',
@@ -33,6 +42,13 @@ export default function PasswordManager({ allowedEmails, onPasswordUpdate }: Pas
     setTimeout(() => setMessage(''), 5000);
   };
 
+  const togglePasswordVisibility = (field: keyof typeof showPasswords) => {
+    setShowPasswords(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }));
+  };
+
   const handleOwnPasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -48,7 +64,7 @@ export default function PasswordManager({ allowedEmails, onPasswordUpdate }: Pas
 
     setIsLoading(true);
     try {
-      const response = await fetch('/api/admin/update-password', {
+      const response = await fetch(`${window.location.origin}/api/admin/update-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +111,7 @@ export default function PasswordManager({ allowedEmails, onPasswordUpdate }: Pas
 
     setIsLoading(true);
     try {
-      const response = await fetch('/api/admin/update-password', {
+      const response = await fetch(`${window.location.origin}/api/admin/update-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -168,43 +184,97 @@ export default function PasswordManager({ allowedEmails, onPasswordUpdate }: Pas
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Current Password
             </label>
-            <input
-              type="password"
-              value={ownPasswordForm.currentPassword}
-              onChange={(e) => setOwnPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
-              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
-              placeholder="Enter your current password"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPasswords.currentPassword ? "text" : "password"}
+                value={ownPasswordForm.currentPassword}
+                onChange={(e) => setOwnPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
+                className="w-full px-4 py-2 pr-12 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                placeholder="Enter your current password"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => togglePasswordVisibility('currentPassword')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+              >
+                {showPasswords.currentPassword ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               New Password
             </label>
-            <input
-              type="password"
-              value={ownPasswordForm.newPassword}
-              onChange={(e) => setOwnPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
-              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
-              placeholder="Enter new password (min 6 characters)"
-              required
-              minLength={6}
-            />
+            <div className="relative">
+              <input
+                type={showPasswords.ownNewPassword ? "text" : "password"}
+                value={ownPasswordForm.newPassword}
+                onChange={(e) => setOwnPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
+                className="w-full px-4 py-2 pr-12 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                placeholder="Enter new password (min 6 characters)"
+                required
+                minLength={6}
+              />
+              <button
+                type="button"
+                onClick={() => togglePasswordVisibility('ownNewPassword')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+              >
+                {showPasswords.ownNewPassword ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Confirm New Password
             </label>
-            <input
-              type="password"
-              value={ownPasswordForm.confirmPassword}
-              onChange={(e) => setOwnPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
-              placeholder="Confirm new password"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPasswords.ownConfirmPassword ? "text" : "password"}
+                value={ownPasswordForm.confirmPassword}
+                onChange={(e) => setOwnPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                className="w-full px-4 py-2 pr-12 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                placeholder="Confirm new password"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => togglePasswordVisibility('ownConfirmPassword')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+              >
+                {showPasswords.ownConfirmPassword ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
 
           <button
@@ -231,7 +301,7 @@ export default function PasswordManager({ allowedEmails, onPasswordUpdate }: Pas
               required
             >
               <option value="">Choose a user to update password</option>
-              {allowedEmails.filter(email => email !== user?.email).map((email) => (
+              {[...new Set(allowedEmails)].filter(email => email !== user?.email).map((email) => (
                 <option key={email} value={email}>
                   {email}
                 </option>
@@ -243,29 +313,65 @@ export default function PasswordManager({ allowedEmails, onPasswordUpdate }: Pas
             <label className="block text-sm font-medium text-gray-300 mb-2">
               New Password
             </label>
-            <input
-              type="password"
-              value={otherPasswordForm.newPassword}
-              onChange={(e) => setOtherPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
-              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
-              placeholder="Enter new password (min 6 characters)"
-              required
-              minLength={6}
-            />
+            <div className="relative">
+              <input
+                type={showPasswords.otherNewPassword ? "text" : "password"}
+                value={otherPasswordForm.newPassword}
+                onChange={(e) => setOtherPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
+                className="w-full px-4 py-2 pr-12 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                placeholder="Enter new password (min 6 characters)"
+                required
+                minLength={6}
+              />
+              <button
+                type="button"
+                onClick={() => togglePasswordVisibility('otherNewPassword')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+              >
+                {showPasswords.otherNewPassword ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Confirm New Password
             </label>
-            <input
-              type="password"
-              value={otherPasswordForm.confirmPassword}
-              onChange={(e) => setOtherPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
-              placeholder="Confirm new password"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPasswords.otherConfirmPassword ? "text" : "password"}
+                value={otherPasswordForm.confirmPassword}
+                onChange={(e) => setOtherPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                className="w-full px-4 py-2 pr-12 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                placeholder="Confirm new password"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => togglePasswordVisibility('otherConfirmPassword')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+              >
+                {showPasswords.otherConfirmPassword ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
 
           <button

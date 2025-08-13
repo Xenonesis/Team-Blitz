@@ -6,11 +6,12 @@ import { useRouter } from 'next/navigation';
 import PasswordManager from '@/components/PasswordManager';
 
 export default function AdminPanel() {
-  const { user, isLoading: authLoading, token } = useAuth();
+  const { user, isLoading: authLoading, token, isSuperAdmin } = useAuth();
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [allowedEmails, setAllowedEmails] = useState<string[]>([]);
   const [blockedEmails, setBlockedEmails] = useState<string[]>([]);
+  const [allUsers, setAllUsers] = useState<string[]>([]);
   const [newEmail, setNewEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -22,20 +23,16 @@ export default function AdminPanel() {
         return;
       }
 
-      // Check if user is super admin - ONLY these two emails allowed
-      const superAdminEmails = [
-        'itisaddy7@gmail.com',
-        'aayushtonk@02@gmail.com'
-      ];
-      
-      if (superAdminEmails.includes(user.email?.toLowerCase())) {
+      // Check if user is super admin using the AuthContext
+      if (isSuperAdmin) {
         setIsAuthorized(true);
         fetchAllowedEmails();
+        fetchAllUsers();
       } else {
         router.push('/admin/login');
       }
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, isSuperAdmin]);
 
   const fetchAllowedEmails = async () => {
     try {
@@ -53,6 +50,24 @@ export default function AdminPanel() {
       }
     } catch (error) {
       console.error('Error fetching emails:', error);
+    }
+  };
+
+  const fetchAllUsers = async () => {
+    try {
+      const response = await fetch('/api/admin/users', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setAllUsers(data.users || []);
+      } else {
+        console.error('Failed to fetch users:', response.status);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
     }
   };
 
@@ -172,6 +187,34 @@ export default function AdminPanel() {
     setTimeout(() => setMessage(''), 3000);
   };
 
+  const grantAccess = async (email: string) => {
+    if (!confirm(`Grant platform access to ${email}?`)) return;
+
+    try {
+      const response = await fetch('/api/admin/allowed-emails', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setAllowedEmails(data.allowedEmails);
+        setBlockedEmails(data.blockedEmails || []);
+        setMessage('Access granted successfully!');
+      } else {
+        setMessage(data.error || 'Failed to grant access');
+      }
+    } catch (error) {
+      setMessage('Error granting access');
+    }
+    setTimeout(() => setMessage(''), 3000);
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -236,48 +279,190 @@ export default function AdminPanel() {
 
           {/* Email List */}
           <div className="bg-gray-900 rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-white mb-4">
-              Allowed Emails ({allowedEmails.length})
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-white">
+                Allowed Emails ({allowedEmails.length})
+              </h2>
+              <div className="text-sm text-gray-400">
+                These emails can access the platform
+              </div>
+            </div>
             
             {allowedEmails.length === 0 ? (
-              <p className="text-gray-400 text-center py-8">No allowed emails found</p>
+              <div className="text-center py-8">
+                <div className="text-gray-400 mb-4">No allowed emails found</div>
+                <div className="text-sm text-gray-500">
+                  Add emails above to grant platform access
+                </div>
+              </div>
             ) : (
               <div className="space-y-3">
-                {allowedEmails.map((email, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-4 bg-gray-800 rounded-lg"
-                  >
-                    <span className="text-white">{email}</span>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => blockEmail(email)}
-                        className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-medium transition-colors"
-                      >
-                        Block
-                      </button>
-                      <button
-                        onClick={() => removeEmail(email)}
-                        className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
-                      >
-                        Remove
-                      </button>
+                {allowedEmails.map((email, index) => {
+                  const isRegisteredUser = allUsers.includes(email);
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-4 bg-gray-800 rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-white">{email}</span>
+                        {isRegisteredUser && (
+                          <span className="text-xs bg-green-600 text-white px-2 py-1 rounded-full">
+                            REGISTERED
+                          </span>
+                        )}
+                        {!isRegisteredUser && (
+                          <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded-full">
+                            INVITED
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => blockEmail(email)}
+                          className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-medium transition-colors"
+                        >
+                          Block
+                        </button>
+                        <button
+                          onClick={() => removeEmail(email)}
+                          className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Statistics */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+            <div className="bg-gray-900 rounded-lg p-6">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-green-400 mb-2">
+                  {allUsers.length}
+                </div>
+                <div className="text-gray-400">Registered Users</div>
+              </div>
+            </div>
+            <div className="bg-gray-900 rounded-lg p-6">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-blue-400 mb-2">
+                  {allowedEmails.length}
+                </div>
+                <div className="text-gray-400">Allowed Emails</div>
+              </div>
+            </div>
+            <div className="bg-gray-900 rounded-lg p-6">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-red-400 mb-2">
+                  {blockedEmails.length}
+                </div>
+                <div className="text-gray-400">Blocked Emails</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Registered Users */}
+          <div className="bg-gray-900 rounded-lg p-6 mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-white">
+                Registered Users ({allUsers.length})
+              </h2>
+              <div className="text-sm text-gray-400">
+                Users who have created accounts
+              </div>
+            </div>
+            
+            {allUsers.length === 0 ? (
+              <div className="text-center py-8">
+                <div className="text-gray-400 mb-4">No registered users found</div>
+                <div className="text-sm text-gray-500">
+                  Users will appear here after they register
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {allUsers.map((email, index) => {
+                  const isAllowed = allowedEmails.includes(email);
+                  const isBlocked = blockedEmails.includes(email);
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-4 bg-gray-800 rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-white">{email}</span>
+                        {isAllowed && (
+                          <span className="text-xs bg-green-600 text-white px-2 py-1 rounded-full">
+                            ALLOWED
+                          </span>
+                        )}
+                        {isBlocked && (
+                          <span className="text-xs bg-red-600 text-white px-2 py-1 rounded-full">
+                            BLOCKED
+                          </span>
+                        )}
+                        {!isAllowed && !isBlocked && (
+                          <span className="text-xs bg-gray-600 text-white px-2 py-1 rounded-full">
+                            NO ACCESS
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        {!isAllowed && !isBlocked && (
+                          <button
+                            onClick={() => grantAccess(email)}
+                            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                          >
+                            Grant Access
+                          </button>
+                        )}
+                        {isAllowed && (
+                          <button
+                            onClick={() => blockEmail(email)}
+                            className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-medium transition-colors"
+                          >
+                            Block
+                          </button>
+                        )}
+                        {isBlocked && (
+                          <button
+                            onClick={() => unblockEmail(email)}
+                            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                          >
+                            Unblock
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
 
           {/* Blocked Emails List */}
           <div className="bg-gray-900 rounded-lg p-6 mt-6">
-            <h2 className="text-xl font-semibold text-white mb-4">
-              Blocked Emails ({blockedEmails.length})
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-white">
+                Blocked Emails ({blockedEmails.length})
+              </h2>
+              <div className="text-sm text-gray-400">
+                Emails that are temporarily blocked
+              </div>
+            </div>
             
             {blockedEmails.length === 0 ? (
-              <p className="text-gray-400 text-center py-8">No blocked emails</p>
+              <div className="text-center py-8">
+                <div className="text-gray-400 mb-4">No blocked emails</div>
+                <div className="text-sm text-gray-500">
+                  Blocked emails will appear here
+                </div>
+              </div>
             ) : (
               <div className="space-y-3">
                 {blockedEmails.map((email, index) => (
@@ -304,10 +489,23 @@ export default function AdminPanel() {
 
           {/* Password Management */}
           <div className="mt-6">
-            <PasswordManager 
-              allowedEmails={[...allowedEmails, 'admin@teamblitz.com', 'itisaddy7@gmail.com', 'aayushtonk@02@gmail.com']} 
-              onPasswordUpdate={fetchAllowedEmails}
-            />
+            {allUsers.length === 0 ? (
+              <div className="bg-gray-900 rounded-lg p-6">
+                <h2 className="text-xl font-semibold text-white mb-4">Password Management</h2>
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                  <p className="text-gray-400">Loading users from database...</p>
+                </div>
+              </div>
+            ) : (
+              <PasswordManager 
+                allowedEmails={allUsers} 
+                onPasswordUpdate={() => {
+                  fetchAllowedEmails();
+                  fetchAllUsers();
+                }}
+              />
+            )}
           </div>
 
           {/* Back to Home */}

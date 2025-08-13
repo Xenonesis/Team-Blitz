@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { isEmailAllowed } from '@/config/allowedEmails';
 
 interface EmailAccessControlProps {
   children: React.ReactNode;
@@ -13,19 +12,39 @@ export default function EmailAccessControl({
   children, 
   fallbackMessage = "Access Restricted" 
 }: EmailAccessControlProps) {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [hasAccess, setHasAccess] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (user?.email) {
-      const allowed = isEmailAllowed(user.email);
-      setHasAccess(allowed);
-    } else {
-      setHasAccess(false);
-    }
-    setIsLoading(false);
-  }, [user]);
+    const checkAccess = async () => {
+      if (user?.email && token) {
+        try {
+          const response = await fetch('/api/auth/check-access', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            setHasAccess(data.hasAccess);
+          } else {
+            console.error('Access check failed:', response.status);
+            setHasAccess(false);
+          }
+        } catch (error) {
+          console.error('Error checking email access:', error);
+          setHasAccess(false);
+        }
+      } else {
+        setHasAccess(false);
+      }
+      setIsLoading(false);
+    };
+
+    checkAccess();
+  }, [user, token]);
 
   if (isLoading) {
     return (
