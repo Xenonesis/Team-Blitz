@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build"
+  command = "npm ci && npm run build"
   publish = ".next"
 
 [build.environment]
@@ -11,8 +11,19 @@
   # Prevent build failures from missing optional environment variables
   GMAIL_USER = "placeholder@example.com"
   GMAIL_APP_PASSWORD = "placeholder-password"
-  JWT_SECRET = "build-time-placeholder-jwt-secret-key"
+  JWT_SECRET = "build-time-placeholder-jwt-secret-key-minimum-32-chars"
   ADMIN_SECRET = "build-time-placeholder-admin-secret"
+  # Firebase placeholders for build
+  NEXT_PUBLIC_FIREBASE_API_KEY = "build-placeholder"
+  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN = "build-placeholder"
+  NEXT_PUBLIC_FIREBASE_PROJECT_ID = "build-placeholder"
+  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET = "build-placeholder"
+  NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID = "build-placeholder"
+  NEXT_PUBLIC_FIREBASE_APP_ID = "build-placeholder"
+  FIREBASE_PROJECT_ID = "build-placeholder"
+  FIREBASE_PRIVATE_KEY = "build-placeholder"
+  FIREBASE_CLIENT_EMAIL = "build-placeholder"
+  NEXT_PUBLIC_BASE_URL = "https://teamblitz.netlify.app"
 
 # Next.js specific configuration
 [[plugins]]
