@@ -14,7 +14,21 @@ export async function authenticateToken(request) {
 
     const decoded = verifyToken(token);
     
-    // Connect to database and get user details
+    // Handle hardcoded super admin case (for login-simple)
+    if (decoded.userId === 'super-admin-1' && decoded.email === 'itisaddy7@gmail.com' && decoded.role === 'super_admin') {
+      const superAdminUser = {
+        id: 'super-admin-1',
+        username: 'superadmin',
+        email: 'itisaddy7@gmail.com',
+        role: 'super_admin',
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      return { user: superAdminUser, decoded };
+    }
+    
+    // Connect to database and get user details for regular users
     await dbConnect();
     const user = await User.findById(decoded.userId);
     
