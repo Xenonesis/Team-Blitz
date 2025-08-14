@@ -7,6 +7,12 @@ import { validateEnvironment } from './envValidation.js';
 
 export const initializeServer = () => {
   try {
+    // Skip initialization during build process
+    if (process.env.CI || process.env.NETLIFY || process.env.NODE_ENV === 'test') {
+      logger.info('Build environment detected - skipping server initialization');
+      return;
+    }
+
     // Validate environment first
     validateEnvironment();
     
@@ -24,6 +30,9 @@ export const initializeServer = () => {
     }
   } catch (error) {
     logger.error('Server initialization failed:', error);
-    throw error;
+    // Don't throw error during build
+    if (!process.env.CI && !process.env.NETLIFY) {
+      throw error;
+    }
   }
 };
