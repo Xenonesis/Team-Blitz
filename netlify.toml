@@ -19,13 +19,13 @@
   FIREBASE_CLIENT_EMAIL = "firebase-adminsdk-fbsvc@teamblitz-45f98.iam.gserviceaccount.com"
   FIREBASE_CLIENT_ID = "112831392827596203243"
   # Application Configuration
-  JWT_SECRET = "team-blitz-super-secret-jwt-key-2025-production-ready"
+  JWT_SECRET = "TeamBlitz2025ProductionSecureJWTSecretKey64CharactersLongForMaximumSecurity"
   JWT_EXPIRES_IN = "7d"
-  ADMIN_SECRET = "team-blitz-admin-2025"
+  ADMIN_SECRET = "TeamBlitzAdminSecret2025ProductionReady"
   NEXT_PUBLIC_BASE_URL = "https://teamblitz.netlify.app"
-  # Email Configuration (you can update these with real values later)
-  GMAIL_USER = "your-email@gmail.com"
-  GMAIL_APP_PASSWORD = "your-16-character-app-password"
+  # Email Configuration (Gmail SMTP)
+  GMAIL_USER = "itisaddy7@gmail.com"
+  GMAIL_APP_PASSWORD = "your-gmail-app-password-here"
 
 # Next.js specific configuration
 [[plugins]]
