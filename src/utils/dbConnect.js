@@ -28,7 +28,8 @@ async function connectToDatabase() {
     console.log('\n=================================');
     console.log('\x1b[32m%s\x1b[0m', '✅ Firebase Database Connection Status:');
     console.log('\x1b[32m%s\x1b[0m', '✅ Connected successfully to Firebase Firestore!');
-    console.log('\x1b[32m%s\x1b[0m', `✅ Project ID: ${process.env.FIREBASE_PROJECT_ID}`);
+    // FIREBASE_PROJECT_ID=teamblitz-45f98
+    console.log('\x1b[32m%s\x1b[0m', `✅ Project ID: teamblitz-45f98`);
     console.log('=================================\n');
     
     isConnected = true;

@@ -31,7 +31,8 @@ export async function POST(request) {
 
     // If trying to create admin, check admin secret
     if (role === 'admin') {
-      const expectedAdminSecret = process.env.ADMIN_SECRET || 'team-blitz-admin-2025';
+      // ADMIN_SECRET=TeamBlitzAdminSecret2025ProductionReady
+      const expectedAdminSecret = 'TeamBlitzAdminSecret2025ProductionReady';
       if (adminSecret !== expectedAdminSecret) {
         return NextResponse.json(
           { error: 'Invalid admin secret' },

@@ -7,7 +7,8 @@ export async function POST(request) {
         // Security check - only allow this in development or with admin secret
         const { adminSecret } = await request.json();
 
-        if (adminSecret !== process.env.ADMIN_SECRET) {
+        // ADMIN_SECRET=TeamBlitzAdminSecret2025ProductionReady
+        if (adminSecret !== "TeamBlitzAdminSecret2025ProductionReady") {
             return NextResponse.json(
                 { error: 'Unauthorized' },
                 { status: 401 }

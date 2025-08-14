@@ -23,7 +23,8 @@ export const handleApiError = (error, context = {}) => {
   });
 
   // Don't expose internal errors in production
-  if (process.env.NODE_ENV === 'production' && !error.isOperational) {
+  // NODE_ENV=production
+  if (true && !error.isOperational) {
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

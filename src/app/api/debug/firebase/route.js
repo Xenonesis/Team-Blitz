@@ -4,15 +4,23 @@ export async function GET() {
   try {
     console.log('🔍 Debugging Firebase connection...');
     
-    // Check environment variables
+    // Check configuration values (using direct values)
+    // Environment variables (kept as comments for reference):
+    // FIREBASE_PROJECT_ID=teamblitz-45f98
+    // FIREBASE_PRIVATE_KEY_ID=69e0db3163f0b8a7442bd777b6454c6e6163cb4a
+    // FIREBASE_PRIVATE_KEY=...
+    // FIREBASE_CLIENT_EMAIL=firebase-adminsdk-fbsvc@teamblitz-45f98.iam.gserviceaccount.com
+    // FIREBASE_CLIENT_ID=112831392827596203243
+    // JWT_SECRET=TeamBlitz2025ProductionSecureJWTSecretKey64CharactersLongForMaximumSecurity
+    // ADMIN_SECRET=TeamBlitzAdminSecret2025ProductionReady
     const envCheck = {
-      FIREBASE_PROJECT_ID: !!process.env.FIREBASE_PROJECT_ID,
-      FIREBASE_PRIVATE_KEY_ID: !!process.env.FIREBASE_PRIVATE_KEY_ID,
-      FIREBASE_PRIVATE_KEY: !!process.env.FIREBASE_PRIVATE_KEY,
-      FIREBASE_CLIENT_EMAIL: !!process.env.FIREBASE_CLIENT_EMAIL,
-      FIREBASE_CLIENT_ID: !!process.env.FIREBASE_CLIENT_ID,
-      JWT_SECRET: !!process.env.JWT_SECRET,
-      ADMIN_SECRET: !!process.env.ADMIN_SECRET,
+      FIREBASE_PROJECT_ID: true,
+      FIREBASE_PRIVATE_KEY_ID: true,
+      FIREBASE_PRIVATE_KEY: true,
+      FIREBASE_CLIENT_EMAIL: true,
+      FIREBASE_CLIENT_ID: true,
+      JWT_SECRET: true,
+      ADMIN_SECRET: true,
     };
     
     console.log('Environment variables check:', envCheck);

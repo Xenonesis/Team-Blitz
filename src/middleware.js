@@ -77,7 +77,8 @@ export function middleware(request) {
   }
 
   // Block access to sensitive files in production
-  if (process.env.NODE_ENV === 'production') {
+  // NODE_ENV=production
+  if (true) {
     const blockedPaths = [
       '/.env',
       '/.env.local',

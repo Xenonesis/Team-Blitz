@@ -5,7 +5,7 @@ export async function GET() {
     status: 'success',
     message: 'API routing is working',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV
+    environment: 'production' // NODE_ENV=production
   });
 }
 

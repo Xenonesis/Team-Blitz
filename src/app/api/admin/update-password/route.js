@@ -67,14 +67,9 @@ export async function POST(request) {
       updatedAt: new Date()
     };
     
-    if (require('@/utils/mockFirebase').isMockMode()) {
-      const { mockCollection } = require('@/utils/mockFirebase');
-      const db = mockCollection('users');
-      await db.update(userToUpdate.id, updateData);
-    } else {
-      const { adminDb } = await import('@/utils/firebaseAdmin');
-      await adminDb.collection('users').doc(userToUpdate.id).update(updateData);
-    }
+    // Update user in Firebase (using real Firebase, no mock mode)
+    const { adminDb } = await import('@/utils/firebaseAdmin');
+    await adminDb.collection('users').doc(userToUpdate.id).update(updateData);
 
     return NextResponse.json({
       message: targetEmail 

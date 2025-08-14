@@ -1,11 +1,16 @@
 import nodemailer from 'nodemailer';
+import { productionConfig } from '@/config/production';
+
+// Environment variables (kept as comments for reference):
+// GMAIL_USER=
+// GMAIL_APP_PASSWORD=
 
 // Check if email service is configured
 const isEmailConfigured = () => {
-  return process.env.GMAIL_USER && 
-         process.env.GMAIL_APP_PASSWORD && 
-         process.env.GMAIL_USER.trim() !== '' && 
-         process.env.GMAIL_APP_PASSWORD.trim() !== '';
+  return productionConfig.gmailUser && 
+         productionConfig.gmailAppPassword && 
+         productionConfig.gmailUser.trim() !== '' && 
+         productionConfig.gmailAppPassword.trim() !== '';
 };
 
 // Email configuration
@@ -18,8 +23,8 @@ const createTransporter = () => {
   return nodemailer.createTransporter({
     service: 'gmail',
     auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASSWORD
+      user: productionConfig.gmailUser,
+      pass: productionConfig.gmailAppPassword
     }
   });
 };
@@ -143,7 +148,7 @@ export const generateRoundReminderEmailTemplate = ({
           </div>
           
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/live_hackthons" class="btn">
+            <a href="${productionConfig.baseUrl}/live_hackthons" class="btn">
               🎯 View Dashboard
             </a>
           </div>
@@ -277,7 +282,7 @@ export const emailTemplates = {
             </div>
             
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/live_hackthons" class="btn">
+              <a href="${productionConfig.baseUrl}/live_hackthons" class="btn">
                 View Dashboard 🚀
               </a>
             </div>
@@ -340,7 +345,7 @@ export const emailTemplates = {
             <p><strong>Location:</strong> ${hackathon.location}</p>
             
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/live_hackthons" 
+              <a href="${productionConfig.baseUrl}/live_hackthons" 
                  style="display: inline-block; background: #f44336; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px;">
                 View Dashboard Now! 🚀
               </a>
@@ -367,7 +372,7 @@ export const sendEmail = async (to, subject, html) => {
     }
     
     const mailOptions = {
-      from: `"Team Blitz Hackathons" <${process.env.GMAIL_USER}>`,
+      from: `"Team Blitz Hackathons" <${productionConfig.gmailUser}>`,
       to: Array.isArray(to) ? to.join(', ') : to,
       subject,
       html

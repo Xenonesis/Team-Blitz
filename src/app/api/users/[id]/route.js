@@ -131,7 +131,8 @@ export async function DELETE(request, { params }) {
     }
 
     // For Firebase, we need to delete the document
-    if (!process.env.MOCK_MODE) {
+    // MOCK_MODE not set, using real Firebase
+    if (true) {
       const { adminDb } = await import('@/utils/firebaseAdmin');
       await adminDb.collection('users').doc(params.id).delete();
     }

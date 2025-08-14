@@ -9,7 +9,8 @@ export async function POST(request) {
     const { adminSecret } = await request.json();
     
     // Check admin secret
-    const expectedAdminSecret = process.env.ADMIN_SECRET || 'team-blitz-admin-2025';
+    // ADMIN_SECRET=TeamBlitzAdminSecret2025ProductionReady
+    const expectedAdminSecret = 'TeamBlitzAdminSecret2025ProductionReady';
     if (adminSecret !== expectedAdminSecret) {
       return NextResponse.json(
         { error: 'Invalid admin secret' },

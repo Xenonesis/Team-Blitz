@@ -1,7 +1,12 @@
 import jwt from 'jsonwebtoken';
+import { productionConfig } from '@/config/production';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+// Environment variables (kept as comments for reference):
+// JWT_SECRET=TeamBlitz2025ProductionSecureJWTSecretKey64CharactersLongForMaximumSecurity
+// JWT_EXPIRES_IN=7d
+
+const JWT_SECRET = productionConfig.jwtSecret;
+const JWT_EXPIRES_IN = productionConfig.jwtExpiresIn;
 
 export const generateToken = (payload) => {
   return jwt.sign(payload, JWT_SECRET, {

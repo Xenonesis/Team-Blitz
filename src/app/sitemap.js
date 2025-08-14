@@ -1,5 +1,6 @@
 export default function sitemap() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://your-domain.com';
+  // NEXT_PUBLIC_BASE_URL=https://teamblitz.netlify.app
+  const baseUrl = 'https://teamblitz.netlify.app';
   
   return [
     {

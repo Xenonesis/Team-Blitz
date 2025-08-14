@@ -228,7 +228,7 @@ export const POST = async (request) => {
     return NextResponse.json(
       { 
         error: error.message || 'Internal Server Error',
-        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        details: undefined // NODE_ENV=production, so no stack trace
       },
       { status: 500 }
     );

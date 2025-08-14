@@ -1,4 +1,5 @@
 import { initializeScheduler } from './scheduler.js';
+import { productionConfig } from '@/config/production';
 
 let schedulerInitialized = false;
 
@@ -8,7 +9,10 @@ import { validateEnvironment } from './envValidation.js';
 export const initializeServer = () => {
   try {
     // Skip initialization during build process
-    if (process.env.CI || process.env.NETLIFY || process.env.NODE_ENV === 'test') {
+    // Environment variables (kept as comments for reference):
+    // CI, NETLIFY, NODE_ENV=production
+    const isBuildEnvironment = process.env.CI || process.env.NETLIFY || process.env.NODE_ENV === 'test';
+    if (isBuildEnvironment) {
       logger.info('Build environment detected - skipping server initialization');
       return;
     }
@@ -16,14 +20,14 @@ export const initializeServer = () => {
     // Validate environment first
     validateEnvironment();
     
-    if (!schedulerInitialized && process.env.NODE_ENV !== 'development') {
+    if (!schedulerInitialized && productionConfig.isProduction) {
       logger.info('Initializing Team Blitz server...');
       
       // Check if email service is configured
-      const hasEmailConfig = process.env.GMAIL_USER && 
-                            process.env.GMAIL_APP_PASSWORD && 
-                            process.env.GMAIL_USER.trim() !== '' && 
-                            process.env.GMAIL_APP_PASSWORD.trim() !== '';
+      const hasEmailConfig = productionConfig.gmailUser && 
+                            productionConfig.gmailAppPassword && 
+                            productionConfig.gmailUser.trim() !== '' && 
+                            productionConfig.gmailAppPassword.trim() !== '';
       
       if (hasEmailConfig) {
         // Initialize the email scheduler
@@ -36,7 +40,7 @@ export const initializeServer = () => {
       
       schedulerInitialized = true;
       logger.success('Server initialization complete!');
-    } else if (process.env.NODE_ENV === 'development') {
+    } else if (productionConfig.isDevelopment) {
       logger.info('Development mode - scheduler initialization skipped');
       logger.info('Use manual notification trigger for testing');
     }

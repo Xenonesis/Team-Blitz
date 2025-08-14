@@ -1,50 +1,26 @@
 import { NextResponse } from 'next/server';
-import { verifyToken } from '@/utils/jwt';
-import dbConnect from '@/utils/dbConnect';
-import User from '@/models/User';
+import { authenticateToken } from '@/middleware/auth';
 
 export async function GET(request) {
   try {
-    const authHeader = request.headers.get('authorization');
+    const authResult = await authenticateToken(request);
     
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (authResult.error) {
       return NextResponse.json(
-        { error: 'No token provided' },
-        { status: 401 }
+        { error: authResult.error },
+        { status: authResult.status }
       );
     }
 
-    const token = authHeader.substring(7);
-    
-    try {
-      const decoded = verifyToken(token);
-      
-      // Connect to database and get fresh user data
-      await dbConnect();
-      const user = await User.findById(decoded.userId);
-      
-      if (!user || !user.isActive) {
-        return NextResponse.json(
-          { error: 'User not found or inactive' },
-          { status: 401 }
-        );
+    return NextResponse.json({
+      valid: true,
+      user: {
+        id: authResult.user.id,
+        username: authResult.user.username,
+        email: authResult.user.email,
+        role: authResult.user.role
       }
-      
-      return NextResponse.json({
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          role: user.role
-        }
-      });
-      
-    } catch (tokenError) {
-      return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
-      );
-    }
+    });
 
   } catch (error) {
     console.error('Token verification error:', error);

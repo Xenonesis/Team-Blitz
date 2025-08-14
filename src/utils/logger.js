@@ -1,6 +1,7 @@
 // Production-ready logging utility
-const isDevelopment = process.env.NODE_ENV === 'development';
-const isProduction = process.env.NODE_ENV === 'production';
+// NODE_ENV=production
+const isDevelopment = false;
+const isProduction = true;
 
 class Logger {
   constructor() {
@@ -75,7 +76,7 @@ class Logger {
       timestamp: new Date().toISOString(),
       event,
       data,
-      environment: process.env.NODE_ENV
+      environment: "production"
     };
 
     if (this.isProd) {
