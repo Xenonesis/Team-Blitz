@@ -1,15 +1,9 @@
-import { isMockMode, mockCollection } from '@/utils/mockFirebase';
-
 const COLLECTION_NAME = 'allowed_emails';
 
-// Get the appropriate database connection
+// Get Firebase database connection
 const getDb = async () => {
-  if (isMockMode()) {
-    return mockCollection(COLLECTION_NAME);
-  } else {
-    const { adminDb } = await import('@/utils/firebaseAdmin');
-    return adminDb.collection(COLLECTION_NAME);
-  }
+  const { adminDb } = await import('@/utils/firebaseAdmin');
+  return adminDb.collection(COLLECTION_NAME);
 };
 
 class AllowedEmail {
@@ -47,18 +41,12 @@ class AllowedEmail {
     this.updatedAt = new Date();
     const emailData = this.toFirestore();
     
-    if (isMockMode()) {
-      const db = await getDb();
-      const result = await db.save(emailData);
-      this.id = result.id;
+    const { adminDb } = await import('@/utils/firebaseAdmin');
+    if (this.id) {
+      await adminDb.collection(COLLECTION_NAME).doc(this.id).set(emailData);
     } else {
-      const { adminDb } = await import('@/utils/firebaseAdmin');
-      if (this.id) {
-        await adminDb.collection(COLLECTION_NAME).doc(this.id).set(emailData);
-      } else {
-        const docRef = await adminDb.collection(COLLECTION_NAME).add(emailData);
-        this.id = docRef.id;
-      }
+      const docRef = await adminDb.collection(COLLECTION_NAME).add(emailData);
+      this.id = docRef.id;
     }
     
     return this;
@@ -85,12 +73,6 @@ class AllowedEmail {
 
   // Static methods
   static async findOne(query) {
-    if (isMockMode()) {
-      const db = await getDb();
-      const result = await db.findOne(query);
-      return result ? new AllowedEmail(result) : null;
-    }
-
     const { adminDb } = await import('@/utils/firebaseAdmin');
     const collection = adminDb.collection(COLLECTION_NAME);
     let firestoreQuery = collection;
@@ -108,12 +90,6 @@ class AllowedEmail {
   }
 
   static async find(query = {}) {
-    if (isMockMode()) {
-      const db = await getDb();
-      const results = await db.find(query);
-      return results.map(data => new AllowedEmail(data));
-    }
-
     const { adminDb } = await import('@/utils/firebaseAdmin');
     const collection = adminDb.collection(COLLECTION_NAME);
     let firestoreQuery = collection;
@@ -130,12 +106,6 @@ class AllowedEmail {
   }
 
   static async findById(id) {
-    if (isMockMode()) {
-      const db = await getDb();
-      const result = await db.findById(id);
-      return result ? new AllowedEmail(result) : null;
-    }
-
     const { adminDb } = await import('@/utils/firebaseAdmin');
     const doc = await adminDb.collection(COLLECTION_NAME).doc(id).get();
     if (!doc.exists) return null;
@@ -145,11 +115,6 @@ class AllowedEmail {
   }
 
   static async deleteOne(query) {
-    if (isMockMode()) {
-      const db = await getDb();
-      return await db.deleteOne(query);
-    }
-
     const { adminDb } = await import('@/utils/firebaseAdmin');
     const collection = adminDb.collection(COLLECTION_NAME);
     let firestoreQuery = collection;

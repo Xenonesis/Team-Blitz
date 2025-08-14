@@ -1,5 +1,3 @@
-import { isMockMode, mockDbConnect } from './mockFirebase.js';
-
 let isConnected = false;
 let connectionPromise = null;
 
@@ -21,19 +19,7 @@ async function dbConnect() {
 
 async function connectToDatabase() {
   try {
-    // Use mock Firebase if credentials are missing
-    if (isMockMode()) {
-      console.log('\n=================================');
-      console.log('\x1b[33m%s\x1b[0m', '⚠️  Mock Firebase Connection (Demo Mode)');
-      console.log('\x1b[33m%s\x1b[0m', '⚠️  Using mock data for testing');
-      console.log('\x1b[33m%s\x1b[0m', '⚠️  Set up real Firebase credentials to use live data');
-      console.log('=================================\n');
-      
-      isConnected = true;
-      return await mockDbConnect();
-    }
-    
-    // Import Firebase Admin only when we have credentials
+    // Import Firebase Admin
     const { adminDb } = await import('./firebaseAdmin');
     
     // Test Firebase connection by attempting to read from a collection
@@ -51,12 +37,10 @@ async function connectToDatabase() {
     console.log('\n=================================');
     console.error('\x1b[31m%s\x1b[0m', '❌ Firebase Connection Error:');
     console.error('\x1b[31m%s\x1b[0m', error.message);
-    console.log('\x1b[33m%s\x1b[0m', '💡 Falling back to mock mode for testing...');
+    console.error('\x1b[31m%s\x1b[0m', '❌ Please check your Firebase credentials');
     console.log('=================================\n');
     
-    // Fall back to mock mode if Firebase fails
-    isConnected = true;
-    return await mockDbConnect();
+    throw error;
   } finally {
     connectionPromise = null;
   }

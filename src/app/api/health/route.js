@@ -16,21 +16,8 @@ export async function GET() {
   try {
     // Environment validation
     try {
-      const envResult = validateEnvironment();
-      if (envResult.status === 'healthy') {
-        health.checks.environment = { status: 'healthy', message: 'All required environment variables present' };
-      } else if (envResult.status === 'degraded') {
-        health.checks.environment = { 
-          status: 'degraded', 
-          message: `Running with ${envResult.placeholders?.length || 0} placeholder values`,
-          details: {
-            placeholders: envResult.placeholders || [],
-            missing: envResult.missing || [],
-            warnings: envResult.warnings || []
-          }
-        };
-        if (health.status === 'healthy') health.status = 'degraded';
-      }
+      validateEnvironment();
+      health.checks.environment = { status: 'healthy', message: 'All required environment variables present' };
     } catch (error) {
       health.checks.environment = { status: 'unhealthy', message: error.message };
       health.status = 'unhealthy';

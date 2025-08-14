@@ -1,16 +1,11 @@
-import { isMockMode, mockCollection } from '@/utils/mockFirebase';
 import bcrypt from 'bcryptjs';
 
 const COLLECTION_NAME = 'users';
 
-// Get the appropriate database connection
+// Get Firebase database connection
 const getDb = async () => {
-  if (isMockMode()) {
-    return mockCollection(COLLECTION_NAME);
-  } else {
-    const { adminDb } = await import('@/utils/firebaseAdmin');
-    return adminDb.collection(COLLECTION_NAME);
-  }
+  const { adminDb } = await import('@/utils/firebaseAdmin');
+  return adminDb.collection(COLLECTION_NAME);
 };
 
 class User {
@@ -110,18 +105,12 @@ class User {
 
     const userData = this.toFirestore();
     
-    if (isMockMode()) {
-      const db = await getDb();
-      const result = await db.save(userData);
-      this.id = result.id;
+    const { adminDb } = await import('@/utils/firebaseAdmin');
+    if (this.id) {
+      await adminDb.collection(COLLECTION_NAME).doc(this.id).set(userData);
     } else {
-      const { adminDb } = await import('@/utils/firebaseAdmin');
-      if (this.id) {
-        await adminDb.collection(COLLECTION_NAME).doc(this.id).set(userData);
-      } else {
-        const docRef = await adminDb.collection(COLLECTION_NAME).add(userData);
-        this.id = docRef.id;
-      }
+      const docRef = await adminDb.collection(COLLECTION_NAME).add(userData);
+      this.id = docRef.id;
     }
     
     return this;
@@ -151,12 +140,6 @@ class User {
 
   // Static methods
   static async findOne(query) {
-    if (isMockMode()) {
-      const db = await getDb();
-      const result = await db.findOne(query);
-      return result ? new User(result) : null;
-    }
-
     const { adminDb } = await import('@/utils/firebaseAdmin');
     const collection = adminDb.collection(COLLECTION_NAME);
     let firestoreQuery = collection;
@@ -190,12 +173,6 @@ class User {
   }
 
   static async find(query = {}) {
-    if (isMockMode()) {
-      const db = await getDb();
-      const results = await db.find(query);
-      return results.map(data => new User(data));
-    }
-
     const { adminDb } = await import('@/utils/firebaseAdmin');
     const collection = adminDb.collection(COLLECTION_NAME);
     let firestoreQuery = collection;
@@ -212,12 +189,6 @@ class User {
   }
 
   static async findById(id) {
-    if (isMockMode()) {
-      const db = await getDb();
-      const result = await db.findById(id);
-      return result ? new User(result) : null;
-    }
-
     const { adminDb } = await import('@/utils/firebaseAdmin');
     const doc = await adminDb.collection(COLLECTION_NAME).doc(id).get();
     if (!doc.exists) return null;

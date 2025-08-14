@@ -1,15 +1,9 @@
-import { isMockMode, mockCollection } from '@/utils/mockFirebase';
-
 const COLLECTION_NAME = 'hackathons';
 
-// Get the appropriate database connection
+// Get Firebase database connection
 const getDb = async () => {
-  if (isMockMode()) {
-    return mockCollection(COLLECTION_NAME);
-  } else {
-    const { adminDb } = await import('@/utils/firebaseAdmin');
-    return adminDb.collection(COLLECTION_NAME);
-  }
+  const { adminDb } = await import('@/utils/firebaseAdmin');
+  return adminDb.collection(COLLECTION_NAME);
 };
 
 class Hackathon {
@@ -80,20 +74,13 @@ class Hackathon {
     this.updatedAt = new Date();
     const hackathonData = this.toFirestore();
     
-    if (isMockMode()) {
-      const db = await getDb();
-      const result = await db.save(hackathonData);
-      this.id = result.id;
-      this._id = result.id;
+    const { adminDb } = await import('@/utils/firebaseAdmin');
+    if (this.id) {
+      await adminDb.collection(COLLECTION_NAME).doc(this.id).set(hackathonData);
     } else {
-      const { adminDb } = await import('@/utils/firebaseAdmin');
-      if (this.id) {
-        await adminDb.collection(COLLECTION_NAME).doc(this.id).set(hackathonData);
-      } else {
-        const docRef = await adminDb.collection(COLLECTION_NAME).add(hackathonData);
-        this.id = docRef.id;
-        this._id = docRef.id;
-      }
+      const docRef = await adminDb.collection(COLLECTION_NAME).add(hackathonData);
+      this.id = docRef.id;
+      this._id = docRef.id;
     }
     
     return this;
@@ -125,12 +112,6 @@ class Hackathon {
 
   // Static methods
   static async find(query = {}) {
-    if (isMockMode()) {
-      const db = await getDb();
-      const results = await db.find(query);
-      return results.map(data => new Hackathon(data));
-    }
-
     const { adminDb } = await import('@/utils/firebaseAdmin');
     const collection = adminDb.collection(COLLECTION_NAME);
     let firestoreQuery = collection;
@@ -177,12 +158,6 @@ class Hackathon {
   }
 
   static async findById(id) {
-    if (isMockMode()) {
-      const db = await getDb();
-      const result = await db.findById(id);
-      return result ? new Hackathon(result) : null;
-    }
-
     const { adminDb } = await import('@/utils/firebaseAdmin');
     const doc = await adminDb.collection(COLLECTION_NAME).doc(id).get();
     if (!doc.exists) return null;
@@ -192,17 +167,6 @@ class Hackathon {
   }
 
   static async findByIdAndUpdate(id, updateData, options = {}) {
-    if (isMockMode()) {
-      const db = await getDb();
-      const current = await db.findById(id);
-      if (!current) return null;
-      
-      const updatedData = { ...current, ...updateData, updatedAt: new Date() };
-      await db.save(updatedData);
-      
-      return new Hackathon(options.new ? updatedData : current);
-    }
-
     const { adminDb } = await import('@/utils/firebaseAdmin');
     const doc = await adminDb.collection(COLLECTION_NAME).doc(id).get();
     if (!doc.exists) return null;
@@ -220,11 +184,6 @@ class Hackathon {
   }
 
   static async deleteMany(query) {
-    if (isMockMode()) {
-      const db = await getDb();
-      return await db.deleteMany(query);
-    }
-
     const { adminDb } = await import('@/utils/firebaseAdmin');
     const hackathons = await this.find(query);
     const batch = adminDb.batch();
