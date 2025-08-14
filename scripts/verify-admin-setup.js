@@ -1,4 +1,5 @@
 const admin = require('firebase-admin');
+const bcrypt = require('bcryptjs');
 require('dotenv').config({ path: '.env.local' });
 
 // Initialize Firebase Admin
@@ -24,74 +25,132 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
-async function verifyAdminSetup() {
+async function verifyAndFixAdmin() {
   try {
-    console.log('✅ ADMIN SETUP VERIFICATION');
-    console.log('===========================\n');
-
-    // Check super admin
-    const superAdminQuery = await db.collection('users')
+    console.log('🔍 Verifying Super Admin Setup...');
+    console.log('📧 Email: itisaddy7@gmail.com');
+    
+    // Check if super admin user exists
+    const userQuery = await db.collection('users')
       .where('email', '==', 'itisaddy7@gmail.com')
       .limit(1)
       .get();
 
-    if (!superAdminQuery.empty) {
-      const superAdmin = superAdminQuery.docs[0].data();
-      console.log('🔑 SUPER ADMIN:');
-      console.log(`   Email: ${superAdmin.email}`);
-      console.log(`   Role: ${superAdmin.role}`);
-      console.log(`   Can access /admin: ${superAdmin.role === 'super_admin' ? '✅ YES' : '❌ NO'}`);
-      console.log(`   Can access live hackathons: ✅ YES`);
+    if (userQuery.empty) {
+      console.log('❌ Super Admin user NOT FOUND in database');
+      console.log('🔧 Creating Super Admin user...');
+      
+      // Create the user
+      const salt = await bcrypt.genSalt(12);
+      const hashedPassword = await bcrypt.hash('TeamBlitz2025!', salt);
+      
+      const superAdminUser = {
+        username: 'superadmin',
+        email: 'itisaddy7@gmail.com',
+        password: hashedPassword,
+        role: 'super_admin',
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      const docRef = await db.collection('users').add(superAdminUser);
+      console.log('✅ Super Admin user created!');
+      console.log(`📄 Document ID: ${docRef.id}`);
     } else {
-      console.log('❌ Super admin not found!');
+      const userDoc = userQuery.docs[0];
+      const userData = userDoc.data();
+      
+      console.log('✅ Super Admin user found in database');
+      console.log('📊 User Details:');
+      console.log(`   - Email: ${userData.email}`);
+      console.log(`   - Username: ${userData.username}`);
+      console.log(`   - Role: ${userData.role}`);
+      console.log(`   - Active: ${userData.isActive}`);
+      console.log(`   - Created: ${userData.createdAt?.toDate()}`);
+      
+      // Test password
+      console.log('\n🔐 Testing password...');
+      const testPassword = 'TeamBlitz2025!';
+      const isPasswordValid = await bcrypt.compare(testPassword, userData.password);
+      
+      if (isPasswordValid) {
+        console.log('✅ Password is correct');
+      } else {
+        console.log('❌ Password is incorrect - updating...');
+        
+        // Update password
+        const salt = await bcrypt.genSalt(12);
+        const hashedPassword = await bcrypt.hash(testPassword, salt);
+        
+        await userDoc.ref.update({
+          password: hashedPassword,
+          role: 'super_admin',
+          isActive: true,
+          updatedAt: new Date()
+        });
+        
+        console.log('✅ Password updated successfully');
+      }
     }
-
-    console.log('');
-
-    // Check admin
-    const adminQuery = await db.collection('users')
-      .where('email', '==', 'aayushtonk02@gmail.com')
+    
+    // Check allowed emails
+    console.log('\n📧 Checking allowed emails...');
+    const emailQuery = await db.collection('allowed_emails')
+      .where('email', '==', 'itisaddy7@gmail.com')
       .limit(1)
       .get();
-
-    if (!adminQuery.empty) {
-      const adminUser = adminQuery.docs[0].data();
-      console.log('👤 ADMIN:');
-      console.log(`   Email: ${adminUser.email}`);
-      console.log(`   Role: ${adminUser.role}`);
-      console.log(`   Can access /admin: ${adminUser.role === 'super_admin' ? '✅ YES' : '❌ NO'}`);
-      console.log(`   Can access live hackathons: ${adminUser.role === 'admin' || adminUser.role === 'super_admin' ? '✅ YES' : '❌ NO'}`);
+    
+    if (emailQuery.empty) {
+      console.log('❌ Email not in allowed list - adding...');
+      
+      const allowedEmailData = {
+        email: 'itisaddy7@gmail.com',
+        status: 'allowed',
+        addedBy: 'system',
+        addedAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      await db.collection('allowed_emails').add(allowedEmailData);
+      console.log('✅ Added to allowed emails');
     } else {
-      console.log('❌ Admin user not found!');
+      const emailDoc = emailQuery.docs[0];
+      const emailData = emailDoc.data();
+      console.log(`✅ Email found in allowed list - Status: ${emailData.status}`);
+      
+      if (emailData.status !== 'allowed') {
+        await emailDoc.ref.update({
+          status: 'allowed',
+          updatedAt: new Date()
+        });
+        console.log('✅ Email status updated to allowed');
+      }
     }
-
-    console.log('\n🔐 LOGIN CREDENTIALS:');
-    console.log('=====================');
-    console.log('Super Admin:');
-    console.log('   📧 Email: itisaddy7@gmail.com');
-    console.log('   🔑 Password: admin123 (or SuperAdmin123! or teamblitz2025)');
-    console.log('   🌐 Access: /admin + /live_hackthons');
-    console.log('');
-    console.log('Admin:');
-    console.log('   📧 Email: aayushtonk02@gmail.com');
-    console.log('   🔑 Password: admin123 (or SuperAdmin123! or teamblitz2025)');
-    console.log('   🌐 Access: /live_hackthons only');
-
-    console.log('\n🧪 TESTING STEPS:');
-    console.log('=================');
-    console.log('1. Log out from the application completely');
-    console.log('2. Clear browser cache and localStorage');
-    console.log('3. Go to /admin/login');
-    console.log('4. Login with itisaddy7@gmail.com');
-    console.log('5. Should be redirected to /admin successfully');
-    console.log('6. Try logging in with aayushtonk02@gmail.com');
-    console.log('7. Should be blocked from /admin but can access /live_hackthons');
-
+    
+    console.log('\n🎉 SETUP COMPLETE!');
+    console.log('\n🔐 Login Credentials:');
+    console.log('   Email: itisaddy7@gmail.com');
+    console.log('   Password: TeamBlitz2025!');
+    console.log('\n🌐 Admin Panel: https://teamblitz.netlify.app/admin/login');
+    
+    console.log('\n🔧 If login still fails, check:');
+    console.log('   1. Network connection');
+    console.log('   2. Browser console for errors');
+    console.log('   3. Firebase console for any issues');
+    
   } catch (error) {
-    console.error('❌ Error verifying admin setup:', error);
+    console.error('❌ Error:', error);
+    
+    if (error.code === 'permission-denied') {
+      console.log('\n🔒 Permission denied - Check:');
+      console.log('   1. Firestore security rules');
+      console.log('   2. Service account permissions');
+      console.log('   3. Database exists and is accessible');
+    }
   } finally {
     process.exit(0);
   }
 }
 
-verifyAdminSetup();
+verifyAndFixAdmin();
