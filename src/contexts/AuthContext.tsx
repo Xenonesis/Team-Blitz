@@ -51,7 +51,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const verifyToken = async (tokenToVerify: string) => {
     try {
-      const response = await fetch('/api/auth/verify-simple', {
+      const response = await fetch('/api/auth/verify', {
         headers: {
           'Authorization': `Bearer ${tokenToVerify}`,
           'Content-Type': 'application/json',
@@ -84,8 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     try {
-      // Try simple login first (temporary fix for Firebase issues)
-      const response = await fetch('/api/auth/login-simple', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
