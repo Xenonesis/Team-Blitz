@@ -60,6 +60,27 @@ const nextConfig = {
       config.externals = [...(config.externals || []), 'tsparticles', 'react-tsparticles'];
     }
     
+    // Handle module resolution issues
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      net: false,
+      tls: false,
+      crypto: false,
+    };
+    
+    // Fix for server-side modules in client bundles
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        'firebase-admin': false,
+        'nodemailer': false,
+        'node-cron': false,
+        'bcryptjs': false,
+        'jsonwebtoken': false,
+      };
+    }
+    
     return config;
   },
   

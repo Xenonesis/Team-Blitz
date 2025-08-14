@@ -1,25 +1,22 @@
 [build]
-  publish = ".next"
   command = "npm run build"
+  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "18"
   NPM_VERSION = "9"
+  # Build environment flags
+  CI = "true"
+  NETLIFY = "true"
   # Prevent build failures from missing optional environment variables
   GMAIL_USER = "placeholder@example.com"
   GMAIL_APP_PASSWORD = "placeholder-password"
+  JWT_SECRET = "build-time-placeholder-jwt-secret-key"
+  ADMIN_SECRET = "build-time-placeholder-admin-secret"
 
 # Next.js specific configuration
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
-[functions]
-  node_bundler = "esbuild"
 
 # Headers for security
 [[headers]]

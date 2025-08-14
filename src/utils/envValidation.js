@@ -42,7 +42,7 @@ export const validateEnvironment = () => {
   // Log results
   if (missing.length > 0) {
     logger.error('Missing required environment variables:', missing);
-    
+
     // Don't fail build during CI/CD or build process
     if (process.env.NODE_ENV === 'production' && !process.env.CI && !process.env.NETLIFY) {
       throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
@@ -67,7 +67,7 @@ export const validateEnvironment = () => {
       'your-super-secret-jwt-key-change-this-in-production',
       'team-blitz-super-secret-jwt-key-2025-production-ready'
     ];
-    
+
     if (weakSecrets.includes(jwtSecret)) {
       logger.error('Using default JWT_SECRET in production! Please change it.');
       // Don't fail build, just warn
