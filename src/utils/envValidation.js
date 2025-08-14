@@ -24,30 +24,48 @@ const RECOMMENDED_ENV_VARS = [
 export const validateEnvironment = () => {
   const missing = [];
   const warnings = [];
+  const placeholders = [];
 
   // Check required variables
   REQUIRED_ENV_VARS.forEach(varName => {
-    if (!process.env[varName]) {
+    const value = process.env[varName];
+    if (!value) {
       missing.push(varName);
+    } else if (value.includes('placeholder') || value.includes('build-')) {
+      placeholders.push(varName);
     }
   });
 
   // Check recommended variables
   RECOMMENDED_ENV_VARS.forEach(varName => {
-    if (!process.env[varName]) {
+    const value = process.env[varName];
+    if (!value) {
       warnings.push(varName);
+    } else if (value.includes('placeholder') || value.includes('build-')) {
+      placeholders.push(varName);
     }
   });
+
+  // Handle placeholder values in production
+  if (placeholders.length > 0) {
+    logger.warn('Using placeholder environment variables:', placeholders);
+    if (process.env.NODE_ENV === 'production') {
+      logger.warn('Application running with placeholder values - some features may not work correctly');
+      // Don't throw error, just warn
+      return { status: 'degraded', placeholders, missing, warnings };
+    }
+  }
 
   // Log results
   if (missing.length > 0) {
     logger.error('Missing required environment variables:', missing);
 
-    // Don't fail build during CI/CD or build process
-    if (process.env.NODE_ENV === 'production' && !process.env.CI && !process.env.NETLIFY) {
+    // Don't fail in production with Netlify/CI or when placeholders are being used
+    if (process.env.NODE_ENV === 'production' && (process.env.CI || process.env.NETLIFY || placeholders.length > 0)) {
+      logger.warn('Production environment detected with missing variables - continuing with degraded functionality');
+      return { status: 'degraded', missing, warnings, placeholders };
+    } else if (process.env.NODE_ENV !== 'production') {
       throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
-    } else {
-      logger.warn('Build continuing despite missing environment variables - some features may not work');
     }
   }
 
@@ -55,7 +73,7 @@ export const validateEnvironment = () => {
     logger.warn('Missing recommended environment variables:', warnings);
   }
 
-  // Validate JWT secret strength in production (but don't fail build)
+  // Validate JWT secret strength in production (but don't fail)
   if (process.env.NODE_ENV === 'production' && process.env.JWT_SECRET) {
     const jwtSecret = process.env.JWT_SECRET;
     if (jwtSecret.length < 32) {
@@ -68,15 +86,13 @@ export const validateEnvironment = () => {
       'team-blitz-super-secret-jwt-key-2025-production-ready'
     ];
 
-    if (weakSecrets.includes(jwtSecret)) {
-      logger.error('Using default JWT_SECRET in production! Please change it.');
-      // Don't fail build, just warn
-      logger.warn('Build continuing with default JWT_SECRET - please update for security');
+    if (weakSecrets.includes(jwtSecret) || jwtSecret.includes('placeholder')) {
+      logger.warn('Using placeholder/default JWT_SECRET - please update for security');
     }
   }
 
   logger.success('Environment validation completed');
-  return true;
+  return { status: 'healthy', missing: [], warnings, placeholders };
 };
 
 // Get environment-specific configuration

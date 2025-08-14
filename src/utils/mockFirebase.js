@@ -228,6 +228,10 @@ export const mockCollection = (collectionName) => ({
 export const isMockMode = () => {
   const hasCredentials = process.env.FIREBASE_PRIVATE_KEY && 
                         process.env.FIREBASE_CLIENT_EMAIL && 
-                        !process.env.FIREBASE_PRIVATE_KEY.includes('REPLACE_WITH');
+                        !process.env.FIREBASE_PRIVATE_KEY.includes('REPLACE_WITH') &&
+                        !process.env.FIREBASE_PRIVATE_KEY.includes('placeholder') &&
+                        !process.env.FIREBASE_PRIVATE_KEY.includes('build-') &&
+                        !process.env.FIREBASE_CLIENT_EMAIL.includes('placeholder') &&
+                        !process.env.FIREBASE_CLIENT_EMAIL.includes('build-');
   return !hasCredentials;
 };

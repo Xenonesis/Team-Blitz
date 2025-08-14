@@ -11,8 +11,16 @@ export const generateToken = (payload) => {
 
 export const verifyToken = (token) => {
   try {
+    // If using placeholder JWT_SECRET, reject all tokens gracefully
+    if (JWT_SECRET.includes('placeholder') || JWT_SECRET.includes('build-time')) {
+      throw new Error('Authentication temporarily unavailable - placeholder JWT secret');
+    }
+    
     return jwt.verify(token, JWT_SECRET);
   } catch (error) {
+    if (error.message.includes('placeholder')) {
+      throw new Error('Authentication temporarily unavailable');
+    }
     throw new Error('Invalid or expired token');
   }
 };
