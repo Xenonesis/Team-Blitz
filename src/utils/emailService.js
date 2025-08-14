@@ -1,12 +1,25 @@
 import nodemailer from 'nodemailer';
 
+// Check if email service is configured
+const isEmailConfigured = () => {
+  return process.env.GMAIL_USER && 
+         process.env.GMAIL_APP_PASSWORD && 
+         process.env.GMAIL_USER.trim() !== '' && 
+         process.env.GMAIL_APP_PASSWORD.trim() !== '';
+};
+
 // Email configuration
 const createTransporter = () => {
+  if (!isEmailConfigured()) {
+    console.log('📧 Email service not configured - Gmail credentials missing');
+    return null;
+  }
+
   return nodemailer.createTransporter({
     service: 'gmail',
     auth: {
-      user: process.env.GMAIL_USER || 'your-email@gmail.com',
-      pass: process.env.GMAIL_APP_PASSWORD || 'your-app-password'
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD
     }
   });
 };
@@ -343,7 +356,15 @@ export const emailTemplates = {
 // Send email function
 export const sendEmail = async (to, subject, html) => {
   try {
+    if (!isEmailConfigured()) {
+      console.log(`📧 Email service disabled - Would have sent email to ${to}: ${subject}`);
+      return { success: false, error: 'Email service not configured', disabled: true };
+    }
+
     const transporter = createTransporter();
+    if (!transporter) {
+      return { success: false, error: 'Email transporter not available', disabled: true };
+    }
     
     const mailOptions = {
       from: `"Team Blitz Hackathons" <${process.env.GMAIL_USER}>`,
@@ -353,16 +374,26 @@ export const sendEmail = async (to, subject, html) => {
     };
 
     const result = await transporter.sendMail(mailOptions);
-    console.log(`Email sent successfully to ${to}:`, result.messageId);
+    console.log(`📧 Email sent successfully to ${to}:`, result.messageId);
     return { success: true, messageId: result.messageId };
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('❌ Error sending email:', error);
     return { success: false, error: error.message };
   }
 };
 
 // Send bulk emails
 export const sendBulkEmails = async (emailList) => {
+  if (!isEmailConfigured()) {
+    console.log(`📧 Email service disabled - Would have sent ${emailList.length} bulk emails`);
+    return emailList.map(email => ({
+      ...email,
+      success: false,
+      error: 'Email service not configured',
+      disabled: true
+    }));
+  }
+
   const results = [];
   
   for (const email of emailList) {

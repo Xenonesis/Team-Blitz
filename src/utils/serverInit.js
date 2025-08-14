@@ -19,8 +19,20 @@ export const initializeServer = () => {
     if (!schedulerInitialized && process.env.NODE_ENV !== 'development') {
       logger.info('Initializing Team Blitz server...');
       
-      // Initialize the email scheduler
-      initializeScheduler();
+      // Check if email service is configured
+      const hasEmailConfig = process.env.GMAIL_USER && 
+                            process.env.GMAIL_APP_PASSWORD && 
+                            process.env.GMAIL_USER.trim() !== '' && 
+                            process.env.GMAIL_APP_PASSWORD.trim() !== '';
+      
+      if (hasEmailConfig) {
+        // Initialize the email scheduler
+        initializeScheduler();
+        logger.success('Email scheduler initialized with Gmail configuration');
+      } else {
+        logger.info('Email service not configured - scheduler disabled');
+        logger.info('Core application functionality available without email features');
+      }
       
       schedulerInitialized = true;
       logger.success('Server initialization complete!');

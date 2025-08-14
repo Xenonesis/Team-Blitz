@@ -23,9 +23,10 @@
   JWT_EXPIRES_IN = "7d"
   ADMIN_SECRET = "TeamBlitzAdminSecret2025ProductionReady"
   NEXT_PUBLIC_BASE_URL = "https://teamblitz.netlify.app"
-  # Email Configuration (Gmail SMTP)
-  GMAIL_USER = "itisaddy7@gmail.com"
-  GMAIL_APP_PASSWORD = "your-gmail-app-password-here"
+  # Email Configuration (Optional - for automated notifications)
+  # Leave empty to disable email features, core app works fine without it
+  GMAIL_USER = ""
+  GMAIL_APP_PASSWORD = ""
 
 # Next.js specific configuration
 [[plugins]]
