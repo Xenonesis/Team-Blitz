@@ -51,12 +51,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const verifyToken = async (tokenToVerify: string) => {
     try {
-      const response = await fetch('/api/auth/verify-simple', {
+      // Try regular verify endpoint first
+      let response = await fetch('/api/auth/verify', {
         headers: {
           'Authorization': `Bearer ${tokenToVerify}`,
           'Content-Type': 'application/json',
         },
       });
+
+      // If regular verify fails, try simple verify (for super admin tokens)
+      if (!response.ok) {
+        response = await fetch('/api/auth/verify-simple', {
+          headers: {
+            'Authorization': `Bearer ${tokenToVerify}`,
+            'Content-Type': 'application/json',
+          },
+        });
+      }
 
       if (response.ok) {
         const data = await response.json();
@@ -84,8 +95,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     try {
-      // Try simple login first (temporary fix for Firebase issues)
-      const response = await fetch('/api/auth/login-simple', {
+      // Check if this is the super admin - use login-simple for super admin only
+      const isSuperAdmin = email.toLowerCase() === 'itisaddy7@gmail.com';
+      const endpoint = isSuperAdmin ? '/api/auth/login-simple' : '/api/auth/login';
+      
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
